@@ -1,8 +1,9 @@
 const DYNMAP_URI = "http://globecraft.eu:8033"
 const WORLD_FILE = "world"
+const WEBHOOK = ""
 
 const PROTECTED_LOCATIONS: WorldLocation[] = [
-    { name: "MAIN BASE", x: 3856, z: -3815, r: 500}
+    { name: "MAIN BASE", x: 3856, z: -3815, r: 1000}
 ]
 
 const WHITELISTED: string[] = [
@@ -81,7 +82,7 @@ async function checkPositions(players: Player[]) {
                         cooldowns.set(player.account, Date.now() + 30000)
 
                         console.log(`PLAYER TRESSPASSING [${Location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`)
-                        const res = await fetch("https://discord.com/api/webhooks/1089188520435912724/U2gV8dBn81UyURlLFQd3sdTKanwsVtRjZ1Ijw4Hs6GTJET4m5WY195LxHszeTrdAPdqM", {
+                        const res = await fetch(WEBHOOK, {
                             "method": "POST",
                             "body": await JSON.stringify({
                                 name: "MOD SATELLITE",

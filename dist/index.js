@@ -10,8 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const DYNMAP_URI = "http://globecraft.eu:8033";
 const WORLD_FILE = "world";
+const WEBHOOK = "";
 const PROTECTED_LOCATIONS = [
-    { name: "MAIN BASE", x: 3856, z: -3815, r: 500 }
+    { name: "MAIN BASE", x: 3856, z: -3815, r: 1000 }
 ];
 const WHITELISTED = [
     "agnat",
@@ -61,7 +62,7 @@ function checkPositions(players) {
                         if (on_cooldown == false) {
                             cooldowns.set(player.account, Date.now() + 30000);
                             console.log(`PLAYER TRESSPASSING [${Location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`);
-                            const res = yield fetch("https://discord.com/api/webhooks/1089188520435912724/U2gV8dBn81UyURlLFQd3sdTKanwsVtRjZ1Ijw4Hs6GTJET4m5WY195LxHszeTrdAPdqM", {
+                            const res = yield fetch(WEBHOOK, {
                                 "method": "POST",
                                 "body": yield JSON.stringify({
                                     name: "MOD SATELLITE",
