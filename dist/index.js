@@ -22,7 +22,16 @@ const WHITELISTED = [
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 let cooldowns = new Map();
 function getInfoForDimention(dim) {
-    return __awaiter(this, void 0, void 0, function* () { return yield (yield fetch(`${DYNMAP_URI}/up/${WORLD_FILE}/${dim}/${Date.now()}`)).json(); });
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, rej) => __awaiter(this, void 0, void 0, function* () {
+            fetch(`${DYNMAP_URI}/up/${WORLD_FILE}/${dim}/${Date.now()}`).then(data => {
+                resolve(data.json());
+            }).catch(err => {
+                console.warn(err);
+                resolve(undefined);
+            });
+        }));
+    });
 }
 function logPlayers(players) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -52,7 +61,7 @@ function checkPositions(players) {
                         if (on_cooldown == false) {
                             cooldowns.set(player.account, Date.now() + 30000);
                             console.log(`PLAYER TRESSPASSING [${Location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`);
-                            const res = yield fetch("https://discord.com/api/webhooks/1088874582791966770/kxAFK05OFnzAG9T1G1ibkq_AjVckJuCkvAfjxFlnPEvYPkr-z9NGxFkaxrcwNxoumj6V", {
+                            const res = yield fetch("https://discord.com/api/webhooks/1089153436261552208/9gVUja-2wJeSlFsi_qXuQlXnSieDH-tu7A66AURLP8gYSnoho8NknGGa6yV3l-KNG5QU", {
                                 "method": "POST",
                                 "body": yield JSON.stringify({
                                     name: "MOD SATALITE",
@@ -74,8 +83,11 @@ function main() {
     return __awaiter(this, void 0, void 0, function* () {
         while (true) {
             const data = yield getInfoForDimention("world");
-            //await logPlayers(data.players)
-            yield checkPositions(data.players);
+            if (data) {
+                //await logPlayers(data.players)
+                //@ts-ignore
+                yield checkPositions(data.players);
+            }
             yield sleep(2000);
         }
     });
