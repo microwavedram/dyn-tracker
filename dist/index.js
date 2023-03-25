@@ -49,13 +49,6 @@ let cooldowns = new Map();
 const getTeamFromTeamName = (teamname) => Database.teams.find(team => team.name == teamname) || { "name": "undefined", "members": [], "vassals": [] };
 function refetch_database() {
     return __awaiter(this, void 0, void 0, function* () {
-        Database = require("../database.json");
-        Database.teams.forEach(team => {
-            if (cooldowns.get(team.name) == undefined) {
-                cooldowns.set(team.name, new Map());
-            }
-        });
-        return;
         yield fetch(DATABASE_URL).then((data) => __awaiter(this, void 0, void 0, function* () {
             Database = yield data.json();
             Database.teams.forEach(team => {
@@ -63,7 +56,15 @@ function refetch_database() {
                     cooldowns.set(team.name, new Map());
                 }
             });
-        })).catch(console.warn);
+        })).catch(err => {
+            Database = require("../database.json");
+            Database.teams.forEach(team => {
+                if (cooldowns.get(team.name) == undefined) {
+                    cooldowns.set(team.name, new Map());
+                }
+            });
+            console.warn("error");
+        });
     });
 }
 function getInfoForDimention(dim) {
@@ -143,5 +144,5 @@ function main() {
         }
     });
 }
-process.removeAllListeners("warning");
+process.removeAllListeners("warning"); // FUCK YOU FETCH WARNINGS
 main();
