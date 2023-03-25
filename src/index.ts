@@ -81,7 +81,7 @@ async function checkPositions(players: Player[]) {
                         cooldowns.set(player.account, Date.now() + 30000)
 
                         console.log(`PLAYER TRESSPASSING [${Location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`)
-                        const res = await fetch("https://discord.com/api/webhooks/1088874611837522032/DV0iYyibcH--zo_nQwSX4v4G4vgcmxSDHM951fc4hgTOcZqHUuyxCY-8i_W8IOQDgWxO", {
+                        const res = await fetch("https://discord.com/api/webhooks/1089188520435912724/U2gV8dBn81UyURlLFQd3sdTKanwsVtRjZ1Ijw4Hs6GTJET4m5WY195LxHszeTrdAPdqM", {
                             "method": "POST",
                             "body": await JSON.stringify({
                                 name: "MOD SATELLITE",
