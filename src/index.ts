@@ -160,6 +160,7 @@ async function checkPositions(players: Player[]) {
 }
 
 async function main() {
+    console.log("Started up the satellite")
 
     while (true) {
         const data = await getInfoForDimention("world")
@@ -170,6 +171,8 @@ async function main() {
             //await logPlayers(data.players)
             //@ts-ignore
             await checkPositions(data.players)
+        } else {
+            console.log("server probably down")
         }
 
         await sleep(2000)

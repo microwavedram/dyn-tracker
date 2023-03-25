@@ -132,6 +132,7 @@ function checkPositions(players) {
 }
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log("Started up the satellite");
         while (true) {
             const data = yield getInfoForDimention("world");
             if (data) {
@@ -139,6 +140,9 @@ function main() {
                 //await logPlayers(data.players)
                 //@ts-ignore
                 yield checkPositions(data.players);
+            }
+            else {
+                console.log("server probably down");
             }
             yield sleep(2000);
         }
