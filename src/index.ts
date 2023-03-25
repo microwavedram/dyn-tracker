@@ -39,7 +39,16 @@ interface WorldLocation {
     r: number
 }
 
-async function getInfoForDimention(dim: string) { return await (await fetch(`${DYNMAP_URI}/up/${WORLD_FILE}/${dim}/${Date.now()}`)).json() }
+async function getInfoForDimention(dim: string) {
+    return new Promise(async (resolve, rej) => {
+        fetch(`${DYNMAP_URI}/up/${WORLD_FILE}/${dim}/${Date.now()}`).then(data => {
+            resolve(data.json())
+        }).catch(err => {
+            console.warn(err)
+            resolve(undefined)
+        })
+    }) 
+}
 
 async function logPlayers(players: Player[]) {
     players.forEach(player => {
@@ -72,7 +81,7 @@ async function checkPositions(players: Player[]) {
                         cooldowns.set(player.account, Date.now() + 30000)
 
                         console.log(`PLAYER TRESSPASSING [${Location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`)
-                        const res = await fetch("https://discord.com/api/webhooks/1088874582791966770/kxAFK05OFnzAG9T1G1ibkq_AjVckJuCkvAfjxFlnPEvYPkr-z9NGxFkaxrcwNxoumj6V", {
+                        const res = await fetch("https://discord.com/api/webhooks/1089153436261552208/9gVUja-2wJeSlFsi_qXuQlXnSieDH-tu7A66AURLP8gYSnoho8NknGGa6yV3l-KNG5QU", {
                             "method": "POST",
                             "body": await JSON.stringify({
                                 name: "MOD SATALITE",
@@ -93,9 +102,12 @@ async function checkPositions(players: Player[]) {
 async function main() {
     while (true) {
         const data = await getInfoForDimention("world")
-        
-        //await logPlayers(data.players)
-        await checkPositions(data.players)
+
+        if (data) {
+            //await logPlayers(data.players)
+            //@ts-ignore
+            await checkPositions(data.players)
+        }
 
         await sleep(2000)
     }
