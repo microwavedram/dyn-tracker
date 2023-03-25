@@ -63,16 +63,6 @@ interface WorldLocation {
 const getTeamFromTeamName = (teamname:string) => Database.teams.find(team => team.name == teamname) || {"name":"undefined", "members": [], "vassals": []}
 
 async function refetch_database() {
-
-    Database = require("../database.json")
-    Database.teams.forEach(team => {
-        if (cooldowns.get(team.name) == undefined) {
-            cooldowns.set(team.name, new Map())
-        }
-    })
-
-    return
-
     await fetch(DATABASE_URL).then(async (data) => {
         Database = await data.json();
 
@@ -83,7 +73,16 @@ async function refetch_database() {
         })
 
 
-    }).catch(console.warn)
+    }).catch(err => {
+        Database = require("../database.json")
+        Database.teams.forEach(team => {
+            if (cooldowns.get(team.name) == undefined) {
+                cooldowns.set(team.name, new Map())
+            }
+        })
+
+        console.warn("error")
+    })
 }
 
 async function getInfoForDimention(dim: string) {
