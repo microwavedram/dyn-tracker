@@ -45,10 +45,17 @@ const BYPASS = [
 ];
 //@ts-ignore
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-const cooldowns = new Map();
+let cooldowns = new Map();
 const getTeamFromTeamName = (teamname) => Database.teams.find(team => team.name == teamname) || { "name": "undefined", "members": [], "vassals": [] };
 function refetch_database() {
     return __awaiter(this, void 0, void 0, function* () {
+        Database = require("../database.json");
+        Database.teams.forEach(team => {
+            if (cooldowns.get(team.name) == undefined) {
+                cooldowns.set(team.name, new Map());
+            }
+        });
+        return;
         yield fetch(DATABASE_URL).then((data) => __awaiter(this, void 0, void 0, function* () {
             Database = yield data.json();
             Database.teams.forEach(team => {
@@ -80,8 +87,9 @@ function checkPositions(players) {
             for (let i = 0; i < Database.watched_locations.length; i++) {
                 const location = Database.watched_locations[i];
                 const location_cooldowns = cooldowns.get(location.name);
-                console.log(Database);
-                console.log(location);
+                if (!location_cooldowns) {
+                    cooldowns.set(location.name, new Map());
+                }
                 const dx = location.coords[0] - player.x;
                 const dz = location.coords[1] - player.z;
                 const distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dz, 2));
@@ -89,13 +97,15 @@ function checkPositions(players) {
                     const cooldown_time = location_cooldowns === null || location_cooldowns === void 0 ? void 0 : location_cooldowns.get(player.account);
                     if (cooldown_time) {
                         if (cooldown_time > Date.now()) {
+                            console.log(cooldown_time);
                             continue;
                         }
                     }
-                    const allowed_teams = location.teams.map(getTeamFromTeamName);
+                    let allowed_teams = location.teams.map(getTeamFromTeamName);
                     allowed_teams.forEach(team => {
-                        allowed_teams.concat(team.vassals.map(getTeamFromTeamName));
+                        allowed_teams = allowed_teams.concat(team.vassals.map(getTeamFromTeamName));
                     });
+                    //console.log(allowed_teams.map(team => `${team.members.map(member => member.username).join()}`).join())
                     if (allowed_teams.some(team => team.members.some(member => member.username == player.account)))
                         continue;
                     location_cooldowns === null || location_cooldowns === void 0 ? void 0 : location_cooldowns.set(player.account, Date.now() + 30000);
@@ -104,13 +114,16 @@ function checkPositions(players) {
                     const res = yield fetch(process.env.WEBHOOK, {
                         "method": "POST",
                         "body": yield JSON.stringify({
-                            content: `PLAYER TRESSPASSING [${location.teams.join()}'s ${location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`,
+                            content: `<@&1089254990499029014> PLAYER TRESSPASSING [${location.teams.map(teamname => teamname + "'s").join(", ")} ${location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`,
                         }),
                         "headers": {
                             "Content-Type": "application/json"
                         }
                     });
                     console.log(yield res.text());
+                }
+                if (location_cooldowns) {
+                    cooldowns.set(location.name, location_cooldowns);
                 }
             }
         }
@@ -130,4 +143,5 @@ function main() {
         }
     });
 }
+process.removeAllListeners("warning");
 main();

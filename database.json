@@ -144,7 +144,7 @@
                 },
                 {
                     "discord": "popcin#8664",
-                    "username": "",
+                    "username": "popcin22",
                     "role": "Member"
                 }
             ]
@@ -172,9 +172,9 @@
         {
             "name": "Hesa",
             "coords": [1652, -4151],
-            "radius": 1000,
+            "radius": 500,
 
-            "Teams": ["Safe Haven"]
+            "teams": ["Safe Haven"]
         }
     ]
 }

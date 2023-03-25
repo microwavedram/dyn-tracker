@@ -17,7 +17,7 @@ const BYPASS: string[] = [
 //@ts-ignore
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
-const cooldowns: Map<string, Map<string, number>> = new Map()
+let cooldowns: Map<string, Map<string, number>> = new Map()
 
 interface Database {
     watched_locations: WorldLocation[]
@@ -63,6 +63,16 @@ interface WorldLocation {
 const getTeamFromTeamName = (teamname:string) => Database.teams.find(team => team.name == teamname) || {"name":"undefined", "members": [], "vassals": []}
 
 async function refetch_database() {
+
+    Database = require("../database.json")
+    Database.teams.forEach(team => {
+        if (cooldowns.get(team.name) == undefined) {
+            cooldowns.set(team.name, new Map())
+        }
+    })
+
+    return
+
     await fetch(DATABASE_URL).then(async (data) => {
         Database = await data.json();
 
@@ -97,9 +107,10 @@ async function checkPositions(players: Player[]) {
         for (let i = 0; i < Database.watched_locations.length; i++) {
             const location = Database.watched_locations[i];
             const location_cooldowns = cooldowns.get(location.name)
-            
-            console.log(Database)
-            console.log(location)
+
+            if (!location_cooldowns) {
+                cooldowns.set(location.name, new Map())
+            }
 
             const dx = location.coords[0] - player.x
             const dz = location.coords[1] - player.z
@@ -110,15 +121,18 @@ async function checkPositions(players: Player[]) {
                 const cooldown_time = location_cooldowns?.get(player.account)
                 if (cooldown_time) {
                     if (cooldown_time > Date.now()) {
+                        console.log(cooldown_time)
                         continue
                     }
                 }
 
-                const allowed_teams: Team[] = location.teams.map(getTeamFromTeamName)
+                let allowed_teams: Team[] = location.teams.map(getTeamFromTeamName)
 
                 allowed_teams.forEach(team => {
-                    allowed_teams.concat(team.vassals.map(getTeamFromTeamName))
+                    allowed_teams = allowed_teams.concat(team.vassals.map(getTeamFromTeamName))
                 })
+
+                //console.log(allowed_teams.map(team => `${team.members.map(member => member.username).join()}`).join())
 
                 if (allowed_teams.some(team => team.members.some(member => member.username == player.account))) continue
 
@@ -129,7 +143,7 @@ async function checkPositions(players: Player[]) {
                 const res = await fetch(process.env.WEBHOOK, {
                     "method": "POST",
                     "body": await JSON.stringify({
-                        content: `PLAYER TRESSPASSING [${location.teams.join()}'s ${location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`,
+                        content: `<@&1089254990499029014> PLAYER TRESSPASSING [${location.teams.map(teamname => teamname + "'s").join(", ")} ${location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`,
                     }),
                     "headers": {
                         "Content-Type": "application/json"
@@ -137,6 +151,10 @@ async function checkPositions(players: Player[]) {
                 })
                 
                 console.log(await res.text())
+            }
+
+            if (location_cooldowns) {
+                cooldowns.set(location.name, location_cooldowns)
             }
         }
     }
@@ -158,5 +176,7 @@ async function main() {
         await sleep(2000)
     }
 }
+
+process.removeAllListeners("warning") // FUCK YOU FETCH WARNINGS
 
 main()
