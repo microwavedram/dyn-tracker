@@ -1,12 +1,15 @@
+import * as dotenv from "dotenv" 
+
+dotenv.config()
+
 const DYNMAP_URI = "http://globecraft.eu:8033"
 const WORLD_FILE = "world"
+const DATABASE_URL = ""
 const WEBHOOK = ""
 
-const PROTECTED_LOCATIONS: WorldLocation[] = [
-    { name: "MAIN BASE", x: 3856, z: -3815, r: 1000}
-]
+let Database: Database
 
-const WHITELISTED: string[] = [
+const BYPASS: string[] = [
     "agnat",
     "Chryst4l",
     "localhackerman"
@@ -16,6 +19,10 @@ const WHITELISTED: string[] = [
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 let cooldowns: Map<string,number> = new Map()
+
+interface Database {
+    watched_locations: Location[]
+}
 
 interface Player {
     name: string,
@@ -33,11 +40,28 @@ interface Player {
     sort: number
 }
 
+interface Member {
+    discord: string,
+    username: string,
+    role: string
+}
+
+interface Team {
+    name: string,
+    vassals: string[]
+    members: Member[]
+}
+
 interface WorldLocation {
     name: string,
-    x: number,
-    z: number,
-    r: number
+    coords: number[],
+    radius: number,
+
+    teams: string[]
+}
+
+async function refetch_database() {
+    Database = fetch()
 }
 
 async function getInfoForDimention(dim: string) {

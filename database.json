@@ -1,0 +1,182 @@
+{
+    "teams": [
+        {
+            "name": "Azorix",
+            "vassals": [],
+            "members": [
+                {
+                    "discord": "Username_WGBW#9029",
+                    "username": "agnat",
+                    "role": "Owner"
+                },
+                {
+                    "discord": "Drunk#5661",
+                    "username": "suiram555",
+                    "role": "Member"
+                },
+                {
+                    "discord": "NOUSER",
+                    "username": "0EvilDream0",
+                    "role": "Member"
+                },
+                {
+                    "discord": "NOUSER",
+                    "username": "Player71012",
+                    "role": "Member"
+                },
+                {
+                    "discord": "Cxllum#1455",
+                    "username": "0EvilDream0",
+                    "role": "Member"
+                },
+                {
+                    "discord": "AMV_A#0045",
+                    "username": "AMV_A",
+                    "role": "Member"
+                },
+                {
+                    "discord": "AMV_A#0045",
+                    "username": "AMV_A",
+                    "role": "Member"
+                },
+                {
+                    "discord": "Christian Stalin#0403",
+                    "username": "JackSparrow6994",
+                    "role": "Member"
+                },
+                {
+                    "discord": "NOUSER",
+                    "username": "MrVidin",
+                    "role": "Member"
+                },
+                {
+                    "discord": "NOUSER",
+                    "username": "Barbosa1578863",
+                    "role": "Member"
+                },
+                {
+                    "discord": "Chryst4l#5347",
+                    "username": "Chryst4l",
+                    "role": "MFA"
+                },
+                {
+                    "discord": "Crazylegs#6312",
+                    "username": "localhackerman",
+                    "role": "MoD"
+                }
+            ]
+        },
+        {
+            "name": "Safe Haven",
+            "vassals": ["Clandestinus"],
+            "members": [
+                {
+                    "discord": "JJAY#5118",
+                    "username": "J_J_A_Y_",
+                    "role": "Owner"
+                },
+                {
+                    "discord": "NOUSER",
+                    "username": "Arashiwi",
+                    "role": "Member"
+                },
+                {
+                    "discord": "NOUSER",
+                    "username": "Madonkuiskaus",
+                    "role": "Member"
+                }
+            ]
+        },
+        {
+            "name": "Clandestinus",
+            "vassals": [],
+            "members": [
+                {
+                    "discord": "Nikodeemus#1605",
+                    "username": "Nikodeemus_",
+                    "role": "Owner"
+                },
+                {
+                    "discord": "Meepburger#2090",
+                    "username": "Meepburger",
+                    "role": "Member"
+                },
+                {
+                    "discord": "Holden#8338",
+                    "username": "Bident",
+                    "role": "Member"
+                },
+                {
+                    "discord": "Congrosium#1869",
+                    "username": "Congrosium",
+                    "role": "Member"
+                },
+                {
+                    "discord": "AquaRages#2252",
+                    "username": "AquaRages",
+                    "role": "Member"
+                },
+                {
+                    "discord": "romppari#1057",
+                    "username": "Roroomine",
+                    "role": "Member"
+                },
+                {
+                    "discord": "Ms. Possuliini#1258",
+                    "username": "AitoPosu",
+                    "role": "Member"
+                }
+            ]
+        },
+        {
+            "name": "Antari",
+            "vassals": [],
+            "members": [
+                {
+                    "discord": "onion lover 116#5168",
+                    "username": "",
+                    "role": "Owner"
+                },
+                {
+                    "discord": "Matt_the_iguana#4176",
+                    "username": "",
+                    "role": "Member"
+                },
+                {
+                    "discord": "popcin#8664",
+                    "username": "",
+                    "role": "Member"
+                }
+            ]
+        },
+        {
+            "name": "Aesti Jardom",
+            "vassals": [],
+            "members": [
+                {
+                    "discord": "Arnas#5115",
+                    "username": "Arnas890",
+                    "role": "Owner"
+                }
+            ]
+        }
+    ],
+    "watched_locations": [
+        [
+            {
+                "name": "Azorix Castle",
+                "coords": [3856, -3815],
+                "radius": 1000,
+
+                "teams": ["Azorix"]
+            },
+            {
+                "name": "Hesa",
+                "coords": [1652, -4151],
+                "radius": 1000,
+
+                "Teams": ["Safe Haven"]
+            }
+        ]
+    ]
+}
