@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,20 +31,34 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+Object.defineProperty(exports, "__esModule", { value: true });
+const dotenv = __importStar(require("dotenv"));
+dotenv.config();
 const DYNMAP_URI = "http://globecraft.eu:8033";
 const WORLD_FILE = "world";
-const WEBHOOK = "";
-const PROTECTED_LOCATIONS = [
-    { name: "MAIN BASE", x: 3856, z: -3815, r: 1000 }
-];
-const WHITELISTED = [
+const DATABASE_URL = "https://raw.githubusercontent.com/microwavedram/dyn-tracker/master/database.json";
+let Database;
+const BYPASS = [
     "agnat",
     "Chryst4l",
     "localhackerman"
 ];
 //@ts-ignore
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-let cooldowns = new Map();
+const cooldowns = new Map();
+const getTeamFromTeamName = (teamname) => Database.teams.find(team => team.name == teamname) || { "name": "undefined", "members": [], "vassals": [] };
+function refetch_database() {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield fetch(DATABASE_URL).then((data) => __awaiter(this, void 0, void 0, function* () {
+            Database = yield data.json();
+            Database.teams.forEach(team => {
+                if (cooldowns.get(team.name) == undefined) {
+                    cooldowns.set(team.name, new Map());
+                }
+            });
+        })).catch(console.warn);
+    });
+}
 function getInfoForDimention(dim) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, rej) => __awaiter(this, void 0, void 0, function* () {
@@ -34,50 +71,49 @@ function getInfoForDimention(dim) {
         }));
     });
 }
-function logPlayers(players) {
-    return __awaiter(this, void 0, void 0, function* () {
-        players.forEach(player => {
-            console.log(`${player.account} ${player.health}HP ${player.armor}ARMOUR  : ${player.x}, ${player.y}, ${player.z}`);
-        });
-    });
-}
 function checkPositions(players) {
     return __awaiter(this, void 0, void 0, function* () {
-        players.forEach((player) => __awaiter(this, void 0, void 0, function* () {
-            if (!WHITELISTED.includes(player.account)) {
-                PROTECTED_LOCATIONS.forEach((Location) => __awaiter(this, void 0, void 0, function* () {
-                    const dx = player.x - Location.x;
-                    const dz = player.z - Location.z;
-                    const distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dz, 2));
-                    if (distance <= Location.r) {
-                        let on_cooldown = false;
-                        if (player.account) {
-                            const cooldown = cooldowns.get(player.account);
-                            if (cooldown) {
-                                if (Date.now() < cooldown) {
-                                    on_cooldown = true;
-                                }
-                            }
-                        }
-                        if (on_cooldown == false) {
-                            cooldowns.set(player.account, Date.now() + 30000);
-                            console.log(`PLAYER TRESSPASSING [${Location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`);
-                            const res = yield fetch(WEBHOOK, {
-                                "method": "POST",
-                                "body": yield JSON.stringify({
-                                    name: "MOD SATELLITE",
-                                    content: `PLAYER TRESSPASSING [${Location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`,
-                                }),
-                                "headers": {
-                                    "Content-Type": "application/json"
-                                }
-                            });
-                            console.log(yield res.text());
+        for (let i = 0; i < players.length; i++) {
+            const player = players[i];
+            if (BYPASS.includes(player.account))
+                continue;
+            for (let i = 0; i < Database.watched_locations.length; i++) {
+                const location = Database.watched_locations[i];
+                const location_cooldowns = cooldowns.get(location.name);
+                console.log(Database);
+                console.log(location);
+                const dx = location.coords[0] - player.x;
+                const dz = location.coords[1] - player.z;
+                const distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dz, 2));
+                if (distance <= location.radius) {
+                    const cooldown_time = location_cooldowns === null || location_cooldowns === void 0 ? void 0 : location_cooldowns.get(player.account);
+                    if (cooldown_time) {
+                        if (cooldown_time > Date.now()) {
+                            continue;
                         }
                     }
-                }));
+                    const allowed_teams = location.teams.map(getTeamFromTeamName);
+                    allowed_teams.forEach(team => {
+                        allowed_teams.concat(team.vassals.map(getTeamFromTeamName));
+                    });
+                    if (allowed_teams.some(team => team.members.some(member => member.username == player.account)))
+                        continue;
+                    location_cooldowns === null || location_cooldowns === void 0 ? void 0 : location_cooldowns.set(player.account, Date.now() + 30000);
+                    console.log(`PLAYER TRESSPASSING [${location.teams.join()}'s ${location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`);
+                    //@ts-ignore
+                    const res = yield fetch(process.env.WEBHOOK, {
+                        "method": "POST",
+                        "body": yield JSON.stringify({
+                            content: `PLAYER TRESSPASSING [${location.teams.join()}'s ${location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`,
+                        }),
+                        "headers": {
+                            "Content-Type": "application/json"
+                        }
+                    });
+                    console.log(yield res.text());
+                }
             }
-        }));
+        }
     });
 }
 function main() {
@@ -85,6 +121,7 @@ function main() {
         while (true) {
             const data = yield getInfoForDimention("world");
             if (data) {
+                yield refetch_database();
                 //await logPlayers(data.players)
                 //@ts-ignore
                 yield checkPositions(data.players);

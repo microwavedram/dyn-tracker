@@ -17,10 +17,11 @@ const BYPASS: string[] = [
 //@ts-ignore
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
-let cooldowns: Map<string,number> = new Map()
+const cooldowns: Map<string, Map<string, number>> = new Map()
 
 interface Database {
-    watched_locations: Location[]
+    watched_locations: WorldLocation[]
+    teams: Team[]
 }
 
 interface Player {
@@ -59,8 +60,20 @@ interface WorldLocation {
     teams: string[]
 }
 
+const getTeamFromTeamName = (teamname:string) => Database.teams.find(team => team.name == teamname) || {"name":"undefined", "members": [], "vassals": []}
+
 async function refetch_database() {
-    Database = fetch()
+    await fetch(DATABASE_URL).then(async (data) => {
+        Database = await data.json();
+
+        Database.teams.forEach(team => {
+            if (cooldowns.get(team.name) == undefined) {
+                cooldowns.set(team.name, new Map())
+            }
+        })
+
+
+    }).catch(console.warn)
 }
 
 async function getInfoForDimention(dim: string) {
@@ -74,62 +87,69 @@ async function getInfoForDimention(dim: string) {
     }) 
 }
 
-async function logPlayers(players: Player[]) {
-    players.forEach(player => {
-        console.log(`${player.account} ${player.health}HP ${player.armor}ARMOUR  : ${player.x}, ${player.y}, ${player.z}`)
-    });
-}
-
 async function checkPositions(players: Player[]) {
-    players.forEach(async player => {
 
-        if (!WHITELISTED.includes(player.account)) {
-            PROTECTED_LOCATIONS.forEach(async (Location: WorldLocation) => {
-                const dx: number = player.x-Location.x
-                const dz: number = player.z-Location.z
+    for (let i = 0; i < players.length; i++) {
+        const player = players[i];
+        
+        if (BYPASS.includes(player.account)) continue;
 
-                const distance = Math.sqrt(Math.pow(dx,2)+Math.pow(dz,2))
+        for (let i = 0; i < Database.watched_locations.length; i++) {
+            const location = Database.watched_locations[i];
+            const location_cooldowns = cooldowns.get(location.name)
+            
+            console.log(Database)
+            console.log(location)
 
-                if (distance <= Location.r) {
-                    let on_cooldown = false
-                    if (player.account) {
-                        const cooldown = cooldowns.get(player.account)
-                        if (cooldown) {
-                            if (Date.now() < cooldown) {
-                                on_cooldown = true
-                            }
-                        }
-                    }
-                    
-                    if (on_cooldown == false) {
-                        cooldowns.set(player.account, Date.now() + 30000)
-
-                        console.log(`PLAYER TRESSPASSING [${Location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`)
-
-                        //@ts-ignore
-                        const res = await fetch(process.env.WEBHOOK, {
-                            "method": "POST",
-                            "body": await JSON.stringify({
-                                name: "MOD SATELLITE",
-                                content: `PLAYER TRESSPASSING [${Location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`,
-                            }),
-                            "headers": {
-                                "Content-Type": "application/json"
-                            }
-                        })
-                        console.log(await res.text())
+            const dx = location.coords[0] - player.x
+            const dz = location.coords[1] - player.z
+            
+            const distance = Math.sqrt( Math.pow(dx,2) + Math.pow(dz,2) )
+            
+            if (distance <= location.radius) {
+                const cooldown_time = location_cooldowns?.get(player.account)
+                if (cooldown_time) {
+                    if (cooldown_time > Date.now()) {
+                        continue
                     }
                 }
-            })
+
+                const allowed_teams: Team[] = location.teams.map(getTeamFromTeamName)
+
+                allowed_teams.forEach(team => {
+                    allowed_teams.concat(team.vassals.map(getTeamFromTeamName))
+                })
+
+                if (allowed_teams.some(team => team.members.some(member => member.username == player.account))) continue
+
+                location_cooldowns?.set(player.account, Date.now() + 30000)
+                console.log(`PLAYER TRESSPASSING [${location.teams.join()}'s ${location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`)
+
+                //@ts-ignore
+                const res = await fetch(process.env.WEBHOOK, {
+                    "method": "POST",
+                    "body": await JSON.stringify({
+                        content: `PLAYER TRESSPASSING [${location.teams.join()}'s ${location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`,
+                    }),
+                    "headers": {
+                        "Content-Type": "application/json"
+                    }
+                })
+                
+                console.log(await res.text())
+            }
         }
-    });
+    }
 }
 
 async function main() {
+
     while (true) {
         const data = await getInfoForDimention("world")
 
         if (data) {
+            await refetch_database()
+
             //await logPlayers(data.players)
             //@ts-ignore
             await checkPositions(data.players)

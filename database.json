@@ -68,7 +68,7 @@
         },
         {
             "name": "Safe Haven",
-            "vassals": ["Clandestinus"],
+            "vassals": ["Clandestinus","Antari","Aesti Jardom"],
             "members": [
                 {
                     "discord": "JJAY#5118",
@@ -162,21 +162,19 @@
         }
     ],
     "watched_locations": [
-        [
-            {
-                "name": "Azorix Castle",
-                "coords": [3856, -3815],
-                "radius": 1000,
+        {
+            "name": "Azorix Castle",
+            "coords": [3856, -3815],
+            "radius": 1000,
 
-                "teams": ["Azorix"]
-            },
-            {
-                "name": "Hesa",
-                "coords": [1652, -4151],
-                "radius": 1000,
+            "teams": ["Azorix"]
+        },
+        {
+            "name": "Hesa",
+            "coords": [1652, -4151],
+            "radius": 1000,
 
-                "Teams": ["Safe Haven"]
-            }
-        ]
+            "Teams": ["Safe Haven"]
+        }
     ]
 }
