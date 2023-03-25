@@ -4,8 +4,7 @@ dotenv.config()
 
 const DYNMAP_URI = "http://globecraft.eu:8033"
 const WORLD_FILE = "world"
-const DATABASE_URL = ""
-const WEBHOOK = ""
+const DATABASE_URL = "https://raw.githubusercontent.com/microwavedram/dyn-tracker/master/database.json"
 
 let Database: Database
 
@@ -106,7 +105,9 @@ async function checkPositions(players: Player[]) {
                         cooldowns.set(player.account, Date.now() + 30000)
 
                         console.log(`PLAYER TRESSPASSING [${Location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`)
-                        const res = await fetch(WEBHOOK, {
+
+                        //@ts-ignore
+                        const res = await fetch(process.env.WEBHOOK, {
                             "method": "POST",
                             "body": await JSON.stringify({
                                 name: "MOD SATELLITE",
