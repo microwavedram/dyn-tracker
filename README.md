@@ -1,3 +1,6 @@
 # dyn-tracker
 
-so i can track people on a minecraft earth server and figure out whos stealing from me
+military low earth orbit satellite for tracking players and ensuring **no one** enters mine, or my clients' bases.
+
+under the hood:
+ - dynmap's internal api is acctually very nice
