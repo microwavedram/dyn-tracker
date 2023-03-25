@@ -61,10 +61,10 @@ function checkPositions(players) {
                         if (on_cooldown == false) {
                             cooldowns.set(player.account, Date.now() + 30000);
                             console.log(`PLAYER TRESSPASSING [${Location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`);
-                            const res = yield fetch("https://discord.com/api/webhooks/1089153436261552208/9gVUja-2wJeSlFsi_qXuQlXnSieDH-tu7A66AURLP8gYSnoho8NknGGa6yV3l-KNG5QU", {
+                            const res = yield fetch("https://discord.com/api/webhooks/1088874611837522032/DV0iYyibcH--zo_nQwSX4v4G4vgcmxSDHM951fc4hgTOcZqHUuyxCY-8i_W8IOQDgWxO", {
                                 "method": "POST",
                                 "body": yield JSON.stringify({
-                                    name: "MOD SATALITE",
+                                    name: "MOD SATELLITE",
                                     content: `PLAYER TRESSPASSING [${Location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`,
                                 }),
                                 "headers": {
