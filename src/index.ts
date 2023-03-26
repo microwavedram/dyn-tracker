@@ -120,7 +120,6 @@ async function checkPositions(players: Player[]) {
                 const cooldown_time = location_cooldowns?.get(player.account)
                 if (cooldown_time) {
                     if (cooldown_time > Date.now()) {
-                        console.log(cooldown_time)
                         continue
                     }
                 }
@@ -149,7 +148,7 @@ async function checkPositions(players: Player[]) {
                     }
                 })
                 
-                console.log(await res.text())
+                //console.log(await res.text())
             }
 
             if (location_cooldowns) {

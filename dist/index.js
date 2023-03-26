@@ -98,7 +98,6 @@ function checkPositions(players) {
                     const cooldown_time = location_cooldowns === null || location_cooldowns === void 0 ? void 0 : location_cooldowns.get(player.account);
                     if (cooldown_time) {
                         if (cooldown_time > Date.now()) {
-                            console.log(cooldown_time);
                             continue;
                         }
                     }
@@ -121,7 +120,7 @@ function checkPositions(players) {
                             "Content-Type": "application/json"
                         }
                     });
-                    console.log(yield res.text());
+                    //console.log(await res.text())
                 }
                 if (location_cooldowns) {
                     cooldowns.set(location.name, location_cooldowns);
