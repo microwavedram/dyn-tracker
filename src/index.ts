@@ -1,10 +1,14 @@
 import * as dotenv from "dotenv" 
+import * as fs from "fs/promises"
+import * as fsd from "fs"
 
 dotenv.config()
 
 const DYNMAP_URI = "http://globecraft.eu:8033"
 const WORLD_FILE = "world"
 const DATABASE_URL = "https://raw.githubusercontent.com/microwavedram/dyn-tracker/master/database.json"
+
+const writeStream = fsd.createWriteStream("./session.csv", { encoding: "utf-8" })
 
 let Database: Database
 
@@ -158,6 +162,12 @@ async function checkPositions(players: Player[]) {
     }
 }
 
+async function logPlayers(players: Player[]) {
+    players.forEach(player => {
+        writeStream.write(`${player.account},${player.x},${player.z}\n`)
+    })
+}
+
 async function main() {
     console.log("Started up the satellite")
 
@@ -167,7 +177,8 @@ async function main() {
         if (data) {
             await refetch_database()
 
-            //await logPlayers(data.players)
+            //@ts-ignore
+            await logPlayers(data.players)
             //@ts-ignore
             await checkPositions(data.players)
         } else {

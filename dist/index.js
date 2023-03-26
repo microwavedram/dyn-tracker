@@ -33,10 +33,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv = __importStar(require("dotenv"));
+const fsd = __importStar(require("fs"));
 dotenv.config();
 const DYNMAP_URI = "http://globecraft.eu:8033";
 const WORLD_FILE = "world";
 const DATABASE_URL = "https://raw.githubusercontent.com/microwavedram/dyn-tracker/master/database.json";
+const writeStream = fsd.createWriteStream("./session.csv", { encoding: "utf-8" });
 let Database;
 const BYPASS = [
     "agnat",
@@ -129,6 +131,13 @@ function checkPositions(players) {
         }
     });
 }
+function logPlayers(players) {
+    return __awaiter(this, void 0, void 0, function* () {
+        players.forEach(player => {
+            writeStream.write(`${player.account},${player.x},${player.z}\n`);
+        });
+    });
+}
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("Started up the satellite");
@@ -136,7 +145,8 @@ function main() {
             const data = yield getInfoForDimention("world");
             if (data) {
                 yield refetch_database();
-                //await logPlayers(data.players)
+                //@ts-ignore
+                yield logPlayers(data.players);
                 //@ts-ignore
                 yield checkPositions(data.players);
             }
