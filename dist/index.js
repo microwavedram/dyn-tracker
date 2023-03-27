@@ -40,8 +40,8 @@ const COOLDOWN = 10000;
 const DYNMAP_URI = "http://globecraft.eu:8033";
 const WORLD_FILE = "world";
 const DATABASE_URL = "https://raw.githubusercontent.com/microwavedram/dyn-tracker/master/database.json";
-const LOG_CHANNEL_ID = "1088874515209146429";
-const GUILD_ID = "1085648041354199170";
+const LOG_CHANNEL_ID = "1089961106191155301";
+const GUILD_ID = "718092900277289102";
 const writeStream = fsd.createWriteStream("./session.csv", { encoding: "utf-8" });
 const discord_client = new discord_js_1.Client({ intents: [discord_js_1.IntentsBitField.Flags.Guilds, discord_js_1.IntentsBitField.Flags.GuildMessages] });
 let log_cache = new Map();
@@ -116,8 +116,8 @@ function checkPositions(players) {
                 const dx = location.coords[0] - player.x;
                 const dz = location.coords[1] - player.z;
                 const distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dz, 2));
-                // if (distance <= 2000) {
-                if (distance <= location.radius) {
+                if (distance <= 2000) {
+                    // if (distance <= location.radius) {
                     const cooldown_time = location_cooldowns === null || location_cooldowns === void 0 ? void 0 : location_cooldowns.get(player.account);
                     if (cooldown_time) {
                         if (cooldown_time > Date.now()) {
@@ -183,7 +183,6 @@ function createLogMessage(player, location) {
         if (log && log.muted) {
             color = 0xff0000;
             next_ignore = true;
-            return;
         }
         ;
         const dx = location.coords[0] - player.x;
@@ -232,7 +231,8 @@ function createLogMessage(player, location) {
             .setLabel("Mute This Instance [until they leave]")
             .setEmoji("🔉")
             .setStyle(discord_js_1.ButtonStyle.Primary)
-            .setCustomId("mute-instance"), new discord_js_1.ButtonBuilder()
+            .setCustomId("mute-instance")
+            .setDisabled(next_ignore), new discord_js_1.ButtonBuilder()
             .setLabel("Mute For Session [until bot crash]")
             .setEmoji("🔇")
             .setStyle(discord_js_1.ButtonStyle.Danger)
@@ -269,11 +269,12 @@ function main() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("Initialising satellite.");
         discord_client.on("interactionCreate", (interaction) => __awaiter(this, void 0, void 0, function* () {
-            var _a;
             if (interaction.isButton()) {
                 //@ts-ignore
-                if (!((_a = interaction.member) === null || _a === void 0 ? void 0 : _a.roles.has("1089587118256435300"))) {
-                    interaction.reply("");
+                const member = interaction.member;
+                if (!!member.roles.cache.has("1089587118256435300")) {
+                    interaction.reply({ content: "You cant do this BOZO.", ephemeral: true });
+                    return;
                 }
                 const message = interaction.message;
                 switch (interaction.customId) {
@@ -301,8 +302,8 @@ function main() {
             }
         }));
         discord_client.on("ready", () => __awaiter(this, void 0, void 0, function* () {
-            var _b, _c;
-            console.log(`Discord Bot Running (${(_b = discord_client.user) === null || _b === void 0 ? void 0 : _b.username}#${(_c = discord_client.user) === null || _c === void 0 ? void 0 : _c.discriminator})!`);
+            var _a, _b;
+            console.log(`Discord Bot Running (${(_a = discord_client.user) === null || _a === void 0 ? void 0 : _a.username}#${(_b = discord_client.user) === null || _b === void 0 ? void 0 : _b.discriminator})!`);
             console.log("Started up the satellite");
             while (true) {
                 const data = yield getInfoForDimention("world");

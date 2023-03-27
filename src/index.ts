@@ -1,7 +1,7 @@
 import * as dotenv from "dotenv" 
 import * as fs from "fs/promises"
 import * as fsd from "fs"
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Client, EmbedBuilder, Guild, IntentsBitField, Message,  MessageEditOptions, TextChannel } from "discord.js"
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Client, EmbedBuilder, Guild, GuildMember, IntentsBitField, Message,  MessageEditOptions, TextChannel } from "discord.js"
 
 dotenv.config()
 
@@ -218,13 +218,14 @@ async function createLogMessage(player: Player, location: WorldLocation) {
     if (!guild) return;
     const channel = guild.channels.cache.get(LOG_CHANNEL_ID) as TextChannel
 
+
     const log = log_cache.get(`${location.name}:${player.name}`)
 
     let color = 0xffffff
     let next_ignore = false
 
     if (log && log.mute_updated) return;
-    if (log && log.muted) { color = 0xff0000; next_ignore = true; return };
+    if (log && log.muted) { color = 0xff0000; next_ignore = true};
 
     const dx = location.coords[0] - player.x
     const dz = location.coords[1] - player.z
@@ -270,12 +271,14 @@ async function createLogMessage(player: Player, location: WorldLocation) {
         .setLabel("Mute This Instance [until they leave]")
         .setEmoji("🔉")
         .setStyle(ButtonStyle.Primary)
-        .setCustomId("mute-instance"),
+        .setCustomId("mute-instance")
+        .setDisabled(next_ignore),
         new ButtonBuilder()
         .setLabel("Mute For Session [until bot crash]")
         .setEmoji("🔇")
         .setStyle(ButtonStyle.Danger)
-        .setCustomId("mute-session"),
+        .setCustomId("mute-session")
+        .setDisabled(next_ignore),
     )
 
     const msg: any = {
@@ -322,8 +325,10 @@ async function main() {
 
         if (interaction.isButton()) {
             //@ts-ignore
-            if (!interaction.member?.roles.has("1089587118256435300")) {
-                interaction.reply("")
+            const member = interaction.member as GuildMember
+            if (!member.roles.cache.has("1089587118256435300")) {
+                interaction.reply({content: "You cant do this BOZO.", ephemeral: true})
+                return
             }
 
             const message = interaction.message
