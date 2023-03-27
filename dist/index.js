@@ -40,8 +40,8 @@ const COOLDOWN = 10000;
 const DYNMAP_URI = "http://globecraft.eu:8033";
 const WORLD_FILE = "world";
 const DATABASE_URL = "https://raw.githubusercontent.com/microwavedram/dyn-tracker/master/database.json";
-const LOG_CHANNEL_ID = "1089961106191155301";
-const GUILD_ID = "718092900277289102";
+const LOG_CHANNEL_ID = "1088874515209146429";
+const GUILD_ID = "1085648041354199170";
 const writeStream = fsd.createWriteStream("./session.csv", { encoding: "utf-8" });
 const discord_client = new discord_js_1.Client({ intents: [discord_js_1.IntentsBitField.Flags.Guilds, discord_js_1.IntentsBitField.Flags.GuildMessages] });
 let log_cache = new Map();
@@ -116,8 +116,8 @@ function checkPositions(players) {
                 const dx = location.coords[0] - player.x;
                 const dz = location.coords[1] - player.z;
                 const distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dz, 2));
-                if (distance <= 2000) {
-                    // if (distance <= location.radius) {
+                // if (distance <= 2000) {
+                if (distance <= location.radius) {
                     const cooldown_time = location_cooldowns === null || location_cooldowns === void 0 ? void 0 : location_cooldowns.get(player.account);
                     if (cooldown_time) {
                         if (cooldown_time > Date.now()) {
@@ -236,7 +236,8 @@ function createLogMessage(player, location) {
             .setLabel("Mute For Session [until bot crash]")
             .setEmoji("🔇")
             .setStyle(discord_js_1.ButtonStyle.Danger)
-            .setCustomId("mute-session"));
+            .setCustomId("mute-session")
+            .setDisabled(next_ignore));
         const msg = {
             content: `<@&1089254990499029014> PLAYER TRESSPASSING [${location.teams.map(teamname => teamname + "'s").join(" and ")} ${location.name}] : ${player.account}`,
             embeds: [embed],
@@ -272,7 +273,7 @@ function main() {
             if (interaction.isButton()) {
                 //@ts-ignore
                 const member = interaction.member;
-                if (!!member.roles.cache.has("1089587118256435300")) {
+                if (!member.roles.cache.has("1089587118256435300")) {
                     interaction.reply({ content: "You cant do this BOZO.", ephemeral: true });
                     return;
                 }
