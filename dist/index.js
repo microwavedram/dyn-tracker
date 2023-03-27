@@ -111,12 +111,12 @@ function checkPositions(players) {
                     if (allowed_teams.some(team => team.members.some(member => member.username == player.account)))
                         continue;
                     location_cooldowns === null || location_cooldowns === void 0 ? void 0 : location_cooldowns.set(player.account, Date.now() + 30000);
-                    console.log(`PLAYER TRESSPASSING [${location.teams.join()}'s ${location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`);
+                    console.log(`PLAYER TRESSPASSING [${location.teams.join()}'s ${location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z} [${distance} blocks from center]`);
                     //@ts-ignore
                     const res = yield fetch(process.env.WEBHOOK, {
                         "method": "POST",
                         "body": yield JSON.stringify({
-                            content: `<@&1089254990499029014> PLAYER TRESSPASSING [${location.teams.map(teamname => teamname + "'s").join(", ")} ${location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z}`,
+                            content: `<@&1089254990499029014> PLAYER TRESSPASSING [${location.teams.map(teamname => teamname + "'s").join(", ")} ${location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z} [${distance} blocks from center]`,
                         }),
                         "headers": {
                             "Content-Type": "application/json"
