@@ -74,6 +74,11 @@
                     "username": "semauk",
                     "role": "Member"
                     
+                },
+                {
+                    "discord": "NOUSER",
+                    "username": ".JackSparrow6994",
+                    "role": "nearby"   
                 }
             ]
         },
