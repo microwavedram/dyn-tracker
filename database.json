@@ -2,7 +2,7 @@
     "teams": [
         {
             "name": "Azorix",
-            "vassals": [],
+            "vassals": ["Nation Of Eden"],
             "members": [
                 {
                     "discord": "Username_WGBW#9029",
@@ -60,11 +60,6 @@
                     "role": "Member"
                 },
                 {
-                    "discord": "Chryst4l#5347",
-                    "username": "Chryst4l",
-                    "role": "MFA"
-                },
-                {
                     "discord": "Crazylegs#6312",
                     "username": "localhackerman",
                     "role": "MoD"
@@ -82,6 +77,17 @@
                 }
             ]
         },
+        {
+            "name": "Nation Of Eden",
+            "vassals": [],
+            "members": [
+                {
+                    "discord": "Chryst4l#5347",
+                    "username": "Chryst4l",
+                    "role": "Owner"
+                }
+            ]
+        }
         {
             "name": "Safe Haven",
             "vassals": ["Clandestinus","Antari","Aesti Jardom"],
@@ -191,6 +197,11 @@
             "radius": 500,
 
             "teams": ["Safe Haven"]
-        }
+        },
+        {
+            "name": "Benis",
+            "coords": [12180,1208],
+            "radius": 1000,
+            "teams": ["Nation Of Eden"]
     ]
 }
