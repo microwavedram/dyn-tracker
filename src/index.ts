@@ -318,7 +318,14 @@ async function main() {
     console.log("Initialising satellite.")
 
     discord_client.on("interactionCreate", async interaction => {
+
+
         if (interaction.isButton()) {
+            //@ts-ignore
+            if (!interaction.member?.roles.has("1089587118256435300")) {
+                interaction.reply("")
+            }
+
             const message = interaction.message
 
             switch (interaction.customId) {

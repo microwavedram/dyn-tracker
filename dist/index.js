@@ -269,7 +269,12 @@ function main() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("Initialising satellite.");
         discord_client.on("interactionCreate", (interaction) => __awaiter(this, void 0, void 0, function* () {
+            var _a;
             if (interaction.isButton()) {
+                //@ts-ignore
+                if (!((_a = interaction.member) === null || _a === void 0 ? void 0 : _a.roles.has("1089587118256435300"))) {
+                    interaction.reply("");
+                }
                 const message = interaction.message;
                 switch (interaction.customId) {
                     case "mute-instance":
@@ -296,8 +301,8 @@ function main() {
             }
         }));
         discord_client.on("ready", () => __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
-            console.log(`Discord Bot Running (${(_a = discord_client.user) === null || _a === void 0 ? void 0 : _a.username}#${(_b = discord_client.user) === null || _b === void 0 ? void 0 : _b.discriminator})!`);
+            var _b, _c;
+            console.log(`Discord Bot Running (${(_b = discord_client.user) === null || _b === void 0 ? void 0 : _b.username}#${(_c = discord_client.user) === null || _c === void 0 ? void 0 : _c.discriminator})!`);
             console.log("Started up the satellite");
             while (true) {
                 const data = yield getInfoForDimention("world");
