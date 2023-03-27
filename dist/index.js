@@ -225,6 +225,9 @@ function createLogMessage(player, location) {
         embed.setTimestamp();
         embed.setAuthor({
             name: "Azorix Satellite Monitoring"
+        })
+            .setFooter({
+            text: `Last Detection: <t:${Date.now()}:R>`
         });
         const row = new discord_js_1.ActionRowBuilder()
             .addComponents(new discord_js_1.ButtonBuilder()

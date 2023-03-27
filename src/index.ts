@@ -264,6 +264,9 @@ async function createLogMessage(player: Player, location: WorldLocation) {
     embed.setAuthor({
         name: "Azorix Satellite Monitoring"
     })
+    .setFooter({
+        text: `Last Detection: <t:${Date.now()}:R>`
+    })
 
     const row = new ActionRowBuilder()
     .addComponents(
