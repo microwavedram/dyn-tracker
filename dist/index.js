@@ -83,7 +83,6 @@ function getInfoForDimention(dim) {
             fetch(`${DYNMAP_URI}/up/${WORLD_FILE}/${dim}/${Date.now()}`).then(data => {
                 resolve(data.json());
             }).catch(err => {
-                console.warn(err);
                 resolve(undefined);
             });
         }));
