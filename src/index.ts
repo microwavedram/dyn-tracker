@@ -116,7 +116,6 @@ async function getInfoForDimention(dim: string) {
         fetch(`${DYNMAP_URI}/up/${WORLD_FILE}/${dim}/${Date.now()}`).then(data => {
             resolve(data.json())
         }).catch(err => {
-            console.warn(err)
             resolve(undefined)
         })
     }) 
