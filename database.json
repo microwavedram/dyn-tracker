@@ -86,7 +86,7 @@
                     "role": "Owner"
                 }
             ]
-        }
+        },
         {
             "name": "Safe Haven",
             "vassals": ["Clandestinus","Antari","Aesti Jardom"],
