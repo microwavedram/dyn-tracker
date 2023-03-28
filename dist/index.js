@@ -48,6 +48,7 @@ let log_cache = new Map();
 let zone_cache = new Map();
 let session_mutes = [];
 let Database;
+let player_count = 0;
 const BYPASS = [
     "agnat",
     "Chryst4l",
@@ -214,7 +215,8 @@ function createLogMessage(player, location) {
         }
         const embed = new discord_js_1.EmbedBuilder();
         embed.setTitle(`Tresspass log ${player.name} in ${location.name}`);
-        embed.setDescription(`<t:${Date.now()}:R> ${player.name} [${player.account}] was detected within ${location.name}`);
+        embed.setDescription(`<t:${Date.now()}:R> ${player.name} [${player.account}] was detected within ${location.name}
+    First Detection was <t:${(log === null || log === void 0 ? void 0 : log.first_detection) || "never apparently?"}:R>`);
         embed.addFields([
             { name: "Distance", value: `${distance}`, "inline": true },
             { name: "Bearing", value: `[${dir}] ${bearing} degrees`, "inline": true },
@@ -226,7 +228,7 @@ function createLogMessage(player, location) {
             name: "Azorix Satellite Monitoring"
         })
             .setFooter({
-            text: `First Detection: <t:${(log === null || log === void 0 ? void 0 : log.first_detection) || Date.now()}:R>`
+            text: `Currently watching ${player_count} players.`
         });
         const row = new discord_js_1.ActionRowBuilder()
             .addComponents(new discord_js_1.ButtonBuilder()
@@ -319,6 +321,8 @@ function main() {
                     yield refetch_database();
                     //@ts-ignore
                     yield logPlayers(data.players);
+                    //@ts-ignore
+                    player_count = data.players.length;
                     //@ts-ignore
                     yield checkPositions(data.players);
                 }

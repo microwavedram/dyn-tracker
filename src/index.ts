@@ -21,6 +21,7 @@ let zone_cache: Map<string, boolean> = new Map();
 let session_mutes: string[] = []
 
 let Database: Database
+let player_count: number = 0
 
 const BYPASS: string[] = [
     "agnat",
@@ -253,7 +254,8 @@ async function createLogMessage(player: Player, location: WorldLocation) {
 
     const embed = new EmbedBuilder()
     embed.setTitle(`Tresspass log ${player.name} in ${location.name}`)
-    embed.setDescription(`<t:${Date.now()}:R> ${player.name} [${player.account}] was detected within ${location.name}`)
+    embed.setDescription(`<t:${Date.now()}:R> ${player.name} [${player.account}] was detected within ${location.name}
+    First Detection was <t:${log?.first_detection || "never apparently?"}:R>`)
     embed.addFields([
         {name: "Distance", value: `${distance}`, "inline": true},
         {name: "Bearing", value: `[${dir}] ${bearing} degrees`, "inline": true},
@@ -265,7 +267,7 @@ async function createLogMessage(player: Player, location: WorldLocation) {
         name: "Azorix Satellite Monitoring"
     })
     .setFooter({
-        text: `First Detection: <t:${log?.first_detection || Date.now()}:R>`
+        text: `Currently watching ${player_count} players.`
     })
 
     const row = new ActionRowBuilder()
@@ -384,6 +386,8 @@ async function main() {
 
                 //@ts-ignore
                 await logPlayers(data.players)
+                //@ts-ignore
+                player_count = data.players.length
                 //@ts-ignore
                 await checkPositions(data.players)
             } else {
