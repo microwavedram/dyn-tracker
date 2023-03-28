@@ -1,7 +1,7 @@
 import * as dotenv from "dotenv" 
 import * as fs from "fs/promises"
 import * as fsd from "fs"
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Client, EmbedBuilder, Guild, GuildMember, IntentsBitField, Message,  MessageEditOptions, TextChannel } from "discord.js"
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Client, EmbedBuilder, Emoji, Guild, GuildEmoji, GuildMember, IntentsBitField, Message,  MessageEditOptions, TextChannel } from "discord.js"
 
 dotenv.config()
 
@@ -46,7 +46,8 @@ interface Log {
     mute_updated: boolean
 
     player: Player,
-    location: WorldLocation
+    location: WorldLocation,
+    first_detection: number
 }
 
 interface Player {
@@ -107,7 +108,7 @@ async function refetch_database() {
             }
         })
 
-        console.warn("error")
+        console.warn("error", err)
     })
 }
 
@@ -252,8 +253,8 @@ async function createLogMessage(player: Player, location: WorldLocation) {
     }
 
     const embed = new EmbedBuilder()
-    embed.setTitle(`Tresspass log ${player.name}, ${location.name}`)
-    embed.setDescription(`${player.name} [${player.account}] was detected within ${location.name}`)
+    embed.setTitle(`Tresspass log ${player.name} in ${location.name}`)
+    embed.setDescription(`<t:${Date.now()}:R> ${player.name} [${player.account}] was detected within ${location.name}`)
     embed.addFields([
         {name: "Distance", value: `${distance}`, "inline": true},
         {name: "Bearing", value: `[${dir}] ${bearing} degrees`, "inline": true},
@@ -265,7 +266,7 @@ async function createLogMessage(player: Player, location: WorldLocation) {
         name: "Azorix Satellite Monitoring"
     })
     .setFooter({
-        text: `Last Detection: <t:${Date.now()}:R>`
+        text: `First Detection: <t:${log?.first_detection || Date.now()}:R>`
     })
 
     const row = new ActionRowBuilder()
@@ -307,6 +308,11 @@ async function createLogMessage(player: Player, location: WorldLocation) {
     }
     const message = await channel.send(msg)
 
+    await message.react("🔫")
+    await message.react("☮️")
+    await message.react("🛟")
+    await message.react("💀")
+
     log_cache.set(`${location.name}:${player.name}`, {
         message_id: `${message.id}`,
         timestamp: Date.now(),
@@ -315,7 +321,8 @@ async function createLogMessage(player: Player, location: WorldLocation) {
         mute_updated: false,
 
         player: player,
-        location: location
+        location: location,
+        first_detection: Date.now()
     })
 }
 
@@ -350,16 +357,16 @@ async function main() {
 
                     break;
                 case "mute-session":
-                    interaction.reply({content: "Muted", ephemeral: true})
-
+                    
                     log_cache.forEach((value, key) => {
                         if (value.message_id == message.id) {
+                            session_mutes.push(`${value.location.name}:${value.player.name}`)
                             value.muted = true
                             log_cache.set(key, value)
-                            session_mutes.push(`${value.location.name}:${value.player.name}`)
                         }
                     });
-
+                    
+                    interaction.reply({content: "Muted", ephemeral: true})
 
                     break;
             }

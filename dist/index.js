@@ -73,7 +73,7 @@ function refetch_database() {
                     cooldowns.set(team.name, new Map());
                 }
             });
-            console.warn("error");
+            console.warn("error", err);
         });
     });
 }
@@ -214,8 +214,8 @@ function createLogMessage(player, location) {
             detections = log.detections + 1;
         }
         const embed = new discord_js_1.EmbedBuilder();
-        embed.setTitle(`Tresspass log ${player.name}, ${location.name}`);
-        embed.setDescription(`${player.name} [${player.account}] was detected within ${location.name}`);
+        embed.setTitle(`Tresspass log ${player.name} in ${location.name}`);
+        embed.setDescription(`<t:${Date.now()}:R> ${player.name} [${player.account}] was detected within ${location.name}`);
         embed.addFields([
             { name: "Distance", value: `${distance}`, "inline": true },
             { name: "Bearing", value: `[${dir}] ${bearing} degrees`, "inline": true },
@@ -227,7 +227,7 @@ function createLogMessage(player, location) {
             name: "Azorix Satellite Monitoring"
         })
             .setFooter({
-            text: `Last Detection: <t:${Date.now()}:R>`
+            text: `First Detection: <t:${(log === null || log === void 0 ? void 0 : log.first_detection) || Date.now()}:R>`
         });
         const row = new discord_js_1.ActionRowBuilder()
             .addComponents(new discord_js_1.ButtonBuilder()
@@ -258,6 +258,10 @@ function createLogMessage(player, location) {
             }
         }
         const message = yield channel.send(msg);
+        yield message.react("🔫");
+        yield message.react("☮️");
+        yield message.react("🛟");
+        yield message.react("💀");
         log_cache.set(`${location.name}:${player.name}`, {
             message_id: `${message.id}`,
             timestamp: Date.now(),
@@ -265,7 +269,8 @@ function createLogMessage(player, location) {
             detections: 1,
             mute_updated: false,
             player: player,
-            location: location
+            location: location,
+            first_detection: Date.now()
         });
     });
 }
@@ -293,14 +298,14 @@ function main() {
                         interaction.reply({ content: "Muted.", ephemeral: true });
                         break;
                     case "mute-session":
-                        interaction.reply({ content: "Muted", ephemeral: true });
                         log_cache.forEach((value, key) => {
                             if (value.message_id == message.id) {
+                                session_mutes.push(`${value.location.name}:${value.player.name}`);
                                 value.muted = true;
                                 log_cache.set(key, value);
-                                session_mutes.push(`${value.location.name}:${value.player.name}`);
                             }
                         });
+                        interaction.reply({ content: "Muted", ephemeral: true });
                         break;
                 }
             }
