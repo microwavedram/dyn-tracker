@@ -81,7 +81,7 @@ function refetch_database() {
 function getInfoForDimention(dim) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, rej) => __awaiter(this, void 0, void 0, function* () {
-            fetch(`${DYNMAP_URI}/up/${WORLD_FILE}/${dim}/${Date.now()}`).then(data => {
+            fetch(`${DYNMAP_URI}/up/${WORLD_FILE}/${dim}/${Math.floor(Date.now() / 1000)}`).then(data => {
                 resolve(data.json());
             }).catch(err => {
                 resolve(undefined);
@@ -215,7 +215,7 @@ function createLogMessage(player, location) {
         }
         const embed = new discord_js_1.EmbedBuilder();
         embed.setTitle(`Tresspass log ${player.name} in ${location.name}`);
-        embed.setDescription(`<t:${Date.now()}:R> ${player.name} [${player.account}] was detected within ${location.name}
+        embed.setDescription(`<t:${Math.floor(Date.now() / 1000)}:R> ${player.name} [${player.account}] was detected within ${location.name}
     First Detection was <t:${(log === null || log === void 0 ? void 0 : log.first_detection) || "never apparently?"}:R>`);
         embed.addFields([
             { name: "Distance", value: `${distance}`, "inline": true },
@@ -265,13 +265,13 @@ function createLogMessage(player, location) {
         yield message.react("💀");
         log_cache.set(`${location.name}:${player.name}`, {
             message_id: `${message.id}`,
-            timestamp: Date.now(),
+            timestamp: Math.floor(Date.now() / 1000),
             muted: false,
             detections: 1,
             mute_updated: false,
             player: player,
             location: location,
-            first_detection: Date.now()
+            first_detection: Math.floor(Date.now() / 1000)
         });
     });
 }
