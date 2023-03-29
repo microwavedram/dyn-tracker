@@ -219,7 +219,8 @@ function createLogMessage(player, location) {
         embed.setTitle(`Tresspass log ${player.name} in ${location.name}`);
         embed.setDescription(`${player.name} [${player.account}] was detected within ${location.name}
     First Detection was <t:${(log === null || log === void 0 ? void 0 : log.first_detection) || "never apparently?"}:R>
-    This Detection was <t:${Math.floor(Date.now() / 1000)}:R>`);
+    This Detection was <t:${Math.floor(Date.now() / 1000)}:R>
+    [Map Link](${DYNMAP_URI})`);
         embed.addFields([
             { name: "Distance", value: `${distance}`, "inline": true },
             { name: "Bearing", value: `[${dir}] ${bearing} degrees`, "inline": true },
@@ -232,7 +233,7 @@ function createLogMessage(player, location) {
             iconURL: ((_a = discord_client.user) === null || _a === void 0 ? void 0 : _a.avatarURL({ size: 256 })) || ""
         })
             .setFooter({
-            text: `Currently watching ${player_count} players. | [Map Link](${DYNMAP_URI})`
+            text: `Currently watching ${player_count} players.`
         });
         const row = new discord_js_1.ActionRowBuilder()
             .addComponents(new discord_js_1.ButtonBuilder()
