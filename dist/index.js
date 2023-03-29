@@ -42,6 +42,7 @@ const WORLD_FILE = "world";
 const DATABASE_URL = "https://raw.githubusercontent.com/microwavedram/dyn-tracker/master/database.json";
 const LOG_CHANNEL_ID = "1088874515209146429";
 const GUILD_ID = "1085648041354199170";
+const BUFFER_ZONE = 100;
 const writeStream = fsd.createWriteStream("./session.csv", { encoding: "utf-8" });
 const discord_client = new discord_js_1.Client({ intents: [discord_js_1.IntentsBitField.Flags.Guilds, discord_js_1.IntentsBitField.Flags.GuildMessages] });
 let log_cache = new Map();
@@ -117,7 +118,7 @@ function checkPositions(players) {
                 const dz = location.coords[1] - player.z;
                 const distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dz, 2));
                 // if (distance <= 2000) {
-                if (distance <= location.radius) {
+                if (distance <= location.radius || (zone_cache.get(`${location.name}:${player.name}`) && distance <= location.radius + BUFFER_ZONE)) {
                     const cooldown_time = location_cooldowns === null || location_cooldowns === void 0 ? void 0 : location_cooldowns.get(player.account);
                     if (cooldown_time) {
                         if (cooldown_time > Date.now()) {
@@ -170,6 +171,7 @@ function logPlayers(players) {
     });
 }
 function createLogMessage(player, location) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const guild = discord_client.guilds.cache.get(GUILD_ID);
         if (!guild)
@@ -215,8 +217,9 @@ function createLogMessage(player, location) {
         }
         const embed = new discord_js_1.EmbedBuilder();
         embed.setTitle(`Tresspass log ${player.name} in ${location.name}`);
-        embed.setDescription(`<t:${Math.floor(Date.now() / 1000)}:R> ${player.name} [${player.account}] was detected within ${location.name}
-    First Detection was <t:${(log === null || log === void 0 ? void 0 : log.first_detection) || "never apparently?"}:R>`);
+        embed.setDescription(`${player.name} [${player.account}] was detected within ${location.name}
+    First Detection was <t:${(log === null || log === void 0 ? void 0 : log.first_detection) || "never apparently?"}:R>
+    This Detection was <t:${Math.floor(Date.now() / 1000)}:R>`);
         embed.addFields([
             { name: "Distance", value: `${distance}`, "inline": true },
             { name: "Bearing", value: `[${dir}] ${bearing} degrees`, "inline": true },
@@ -225,10 +228,11 @@ function createLogMessage(player, location) {
         embed.setColor(color);
         embed.setTimestamp();
         embed.setAuthor({
-            name: "Azorix Satellite Monitoring"
+            name: "Azorix Satellite Monitoring",
+            iconURL: ((_a = discord_client.user) === null || _a === void 0 ? void 0 : _a.avatarURL({ size: 256 })) || ""
         })
             .setFooter({
-            text: `Currently watching ${player_count} players.`
+            text: `Currently watching ${player_count} players. | [Map Link](${DYNMAP_URI})`
         });
         const row = new discord_js_1.ActionRowBuilder()
             .addComponents(new discord_js_1.ButtonBuilder()

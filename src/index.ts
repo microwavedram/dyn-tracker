@@ -1,7 +1,7 @@
 import * as dotenv from "dotenv" 
 import * as fs from "fs/promises"
 import * as fsd from "fs"
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Client, EmbedBuilder, Emoji, Guild, GuildEmoji, GuildMember, IntentsBitField, Message,  MessageEditOptions, TextChannel } from "discord.js"
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Client, EmbedBuilder, Guild, GuildMember, IntentsBitField, Message,  MessageEditOptions, TextChannel } from "discord.js"
 
 dotenv.config()
 
@@ -11,6 +11,7 @@ const WORLD_FILE = "world"
 const DATABASE_URL = "https://raw.githubusercontent.com/microwavedram/dyn-tracker/master/database.json"
 const LOG_CHANNEL_ID = "1088874515209146429"
 const GUILD_ID = "1085648041354199170"
+const BUFFER_ZONE = 100
 
 const writeStream = fsd.createWriteStream("./session.csv", { encoding: "utf-8" })
 
@@ -156,7 +157,7 @@ async function checkPositions(players: Player[]) {
             const distance = Math.sqrt( Math.pow(dx,2) + Math.pow(dz,2) )
             
             // if (distance <= 2000) {
-            if (distance <= location.radius) {
+            if (distance <= location.radius || (zone_cache.get(`${location.name}:${player.name}`) && distance <= location.radius + BUFFER_ZONE)  ) {
                 const cooldown_time = location_cooldowns?.get(player.account)
                 if (cooldown_time) {
                     if (cooldown_time > Date.now()) {
@@ -254,8 +255,9 @@ async function createLogMessage(player: Player, location: WorldLocation) {
 
     const embed = new EmbedBuilder()
     embed.setTitle(`Tresspass log ${player.name} in ${location.name}`)
-    embed.setDescription(`<t:${Math.floor(Date.now()/1000)}:R> ${player.name} [${player.account}] was detected within ${location.name}
-    First Detection was <t:${log?.first_detection || "never apparently?"}:R>`)
+    embed.setDescription(`${player.name} [${player.account}] was detected within ${location.name}
+    First Detection was <t:${log?.first_detection || "never apparently?"}:R>
+    This Detection was <t:${Math.floor(Date.now()/1000)}:R>`)
     embed.addFields([
         {name: "Distance", value: `${distance}`, "inline": true},
         {name: "Bearing", value: `[${dir}] ${bearing} degrees`, "inline": true},
@@ -264,10 +266,11 @@ async function createLogMessage(player: Player, location: WorldLocation) {
     embed.setColor(color)
     embed.setTimestamp()
     embed.setAuthor({
-        name: "Azorix Satellite Monitoring"
+        name: "Azorix Satellite Monitoring",
+        iconURL: discord_client.user?.avatarURL({size: 256}) || ""
     })
     .setFooter({
-        text: `Currently watching ${player_count} players.`
+        text: `Currently watching ${player_count} players. | [Map Link](${DYNMAP_URI})`
     })
 
     const row = new ActionRowBuilder()
