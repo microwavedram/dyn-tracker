@@ -210,7 +210,7 @@
         {
             "name": "Benis",
             "coords": [12180,1208],
-            "radius": 1000,
+            "radius": 850,
             "teams": ["Nation Of Eden"]
         }
     ]
