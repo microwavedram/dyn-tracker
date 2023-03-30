@@ -160,8 +160,13 @@
             "members": [
                 {
                     "discord": "onion lover 116#5168",
-                    "username": "",
+                    "username": "gamosphere",
                     "role": "Owner"
+                },
+                {
+                    "discord": "onion lover 116#5168",
+                    "username": ".gamosphere",
+                    "role": "Owner Bedrock"
                 },
                 {
                     "discord": "Matt_the_iguana#4176",
