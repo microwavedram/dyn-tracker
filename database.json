@@ -196,7 +196,7 @@
         {
             "name": "Azorix Castle",
             "coords": [3856, -3815],
-            "radius": 1000,
+            "radius": 850,
 
             "teams": ["Azorix"]
         },
@@ -210,7 +210,7 @@
         {
             "name": "Benis",
             "coords": [12180,1208],
-            "radius": 850,
+            "radius": 1000,
             "teams": ["Nation Of Eden"]
         }
     ]
