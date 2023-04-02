@@ -258,7 +258,7 @@ async function createLogMessage(player: Player, location: WorldLocation) {
     embed.setDescription(`${player.name} [${player.account}] was detected within ${location.name}
     First Detection was <t:${log?.first_detection || "never apparently?"}:R>
     This Detection was <t:${Math.floor(Date.now()/1000)}:R>
-    [Map Link](${DYNMAP_URI})`)
+    [Map Link](${DYNMAP_URI}/?worldname=world&mapname=flat&zoom=3&x=${player.x}&y=64&x=${player.z})`)
     embed.addFields([
         {name: "Distance", value: `${distance}`, "inline": true},
         {name: "Bearing", value: `[${dir}] ${bearing} degrees`, "inline": true},
