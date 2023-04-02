@@ -160,8 +160,13 @@
             "members": [
                 {
                     "discord": "onion lover 116#5168",
-                    "username": "",
+                    "username": "gamosphere",
                     "role": "Owner"
+                },
+                {
+                    "discord": "onion lover 116#5168",
+                    "username": ".gamosphere",
+                    "role": "Owner Bedrock"
                 },
                 {
                     "discord": "Matt_the_iguana#4176",
@@ -191,7 +196,7 @@
         {
             "name": "Azorix Castle",
             "coords": [3856, -3815],
-            "radius": 1000,
+            "radius": 850,
 
             "teams": ["Azorix"]
         },
