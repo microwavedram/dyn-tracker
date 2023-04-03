@@ -220,7 +220,7 @@ function createLogMessage(player, location) {
         embed.setDescription(`${player.name} [${player.account}] was detected within ${location.name}
     First Detection was <t:${(log === null || log === void 0 ? void 0 : log.first_detection) || "never apparently?"}:R>
     This Detection was <t:${Math.floor(Date.now() / 1000)}:R>
-    [Map Link](${DYNMAP_URI}/?worldname=world&mapname=flat&zoom=3&x=${player.x}&y=64&x=${player.z})`);
+    [Map Link](${DYNMAP_URI}/?worldname=world&mapname=flat&zoom=3&x=${player.x}&y=64&z=${player.z})`);
         embed.addFields([
             { name: "Distance", value: `${distance}`, "inline": true },
             { name: "Bearing", value: `[${dir}] ${bearing} degrees`, "inline": true },
