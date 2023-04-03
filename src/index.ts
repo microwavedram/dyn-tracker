@@ -264,7 +264,7 @@ async function createLogMessage(player: Player, location: WorldLocation) {
         {name: "Bearing", value: `[${dir}] ${bearing} degrees`, "inline": true},
         {name: "Detections", value: `${detections}`, "inline": true},
         {name: "Health", value: `${player.health}`},
-        {name: "Armour", value: `${player.armor}`}
+        {name: "Armour", value: `${player.armor}`, "inline": true}
     ])
     embed.setColor(color)
     embed.setTimestamp()
