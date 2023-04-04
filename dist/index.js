@@ -166,7 +166,7 @@ function checkPositions(players) {
 function logPlayers(players) {
     return __awaiter(this, void 0, void 0, function* () {
         players.forEach(player => {
-            writeStream.write(`${player.account},${player.x},${player.z}\n`);
+            writeStream.write(`${player.account},${player.x},${player.y},${player.z}\n`);
         });
     });
 }
@@ -220,12 +220,13 @@ function createLogMessage(player, location) {
         embed.setDescription(`${player.name} [${player.account}] was detected within ${location.name}
     First Detection was <t:${(log === null || log === void 0 ? void 0 : log.first_detection) || "never apparently?"}:R>
     This Detection was <t:${Math.floor(Date.now() / 1000)}:R>
-    [Map Link](${DYNMAP_URI}/?worldname=world&mapname=flat&zoom=3&x=${player.x}&y=64&z=${player.z})`);
+    [Map Link](${DYNMAP_URI}/?worldname=world&mapname=flat&zoom=3&x=${player.x}&y=64&z=${player.z})
+    Coordinates: ${player.x},${player.y},${player.z}`);
         embed.addFields([
             { name: "Distance", value: `${distance}`, "inline": true },
             { name: "Bearing", value: `[${dir}] ${bearing} degrees`, "inline": true },
-            { name: "Detections", value: `${detections}`, "inline": true },
-            { name: "Health", value: `${player.health}` },
+            { name: "Detections", value: `${detections}` },
+            { name: "Health", value: `${player.health}`, "inline": true },
             { name: "Armour", value: `${player.armor}`, "inline": true }
         ]);
         embed.setColor(color);
@@ -322,7 +323,7 @@ function main() {
             var _a, _b;
             console.log(`Discord Bot Running (${(_a = discord_client.user) === null || _a === void 0 ? void 0 : _a.username}#${(_b = discord_client.user) === null || _b === void 0 ? void 0 : _b.discriminator})!`);
             console.log("Started up the satellite");
-            if (false) {
+            if (undefined != undefined) {
                 const guild = yield discord_client.guilds.fetch("1085648041354199170");
                 const role = yield guild.roles.create({
                     name: "hoist",

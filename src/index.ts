@@ -211,7 +211,7 @@ async function checkPositions(players: Player[]) {
 
 async function logPlayers(players: Player[]) {
     players.forEach(player => {
-        writeStream.write(`${player.account},${player.x},${player.z}\n`)
+        writeStream.write(`${player.account},${player.x},${player.y},${player.z}\n`)
     })
 }
 
@@ -258,12 +258,13 @@ async function createLogMessage(player: Player, location: WorldLocation) {
     embed.setDescription(`${player.name} [${player.account}] was detected within ${location.name}
     First Detection was <t:${log?.first_detection || "never apparently?"}:R>
     This Detection was <t:${Math.floor(Date.now()/1000)}:R>
-    [Map Link](${DYNMAP_URI}/?worldname=world&mapname=flat&zoom=3&x=${player.x}&y=64&z=${player.z})`)
+    [Map Link](${DYNMAP_URI}/?worldname=world&mapname=flat&zoom=3&x=${player.x}&y=64&z=${player.z})
+    Coordinates: ${player.x},${player.y},${player.z}`)
     embed.addFields([
         {name: "Distance", value: `${distance}`, "inline": true},
         {name: "Bearing", value: `[${dir}] ${bearing} degrees`, "inline": true},
-        {name: "Detections", value: `${detections}`, "inline": true},
-        {name: "Health", value: `${player.health}`},
+        {name: "Detections", value: `${detections}`},
+        {name: "Health", value: `${player.health}`, "inline": true},
         {name: "Armour", value: `${player.armor}`, "inline": true}
     ])
     embed.setColor(color)
@@ -385,7 +386,7 @@ async function main() {
         console.log("Started up the satellite")
 
 
-        if (false) {
+        if (undefined != undefined) {
             const guild = await discord_client.guilds.fetch("1085648041354199170")
 
             const role = await guild.roles.create({
