@@ -157,7 +157,7 @@ async function checkPositions(players: Player[]) {
             const distance = Math.sqrt( Math.pow(dx,2) + Math.pow(dz,2) )
             
             // if (distance <= 2000) {
-            if (distance <= location.radius || (zone_cache.get(`${location.name}:${player.name}`) && distance <= location.radius + BUFFER_ZONE)  ) {
+            if (distance <= location.radius || (zone_cache.get(`${location.name}:${player.account}`) && distance <= location.radius + BUFFER_ZONE)  ) {
                 const cooldown_time = location_cooldowns?.get(player.account)
                 if (cooldown_time) {
                     if (cooldown_time > Date.now()) {
@@ -181,7 +181,7 @@ async function checkPositions(players: Player[]) {
                 console.log(`PLAYER TRESSPASSING [${location.teams.join()}'s ${location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z} [${distance} blocks from center]`)
 
                 //@ts-ignore
-                zone_cache.set(`${location.name}:${player.name}`, true)
+                zone_cache.set(`${location.name}:${player.account}`, true)
                 await createLogMessage(player, location)
 
                 // const res = await fetch(process.env.WEBHOOK, {
@@ -196,9 +196,9 @@ async function checkPositions(players: Player[]) {
                 
                 //console.log(await res.text())
             } else {
-                const removed = zone_cache.delete(`${location.name}:${player.name}`)
+                const removed = zone_cache.delete(`${location.name}:${player.account}`)
                 if (removed) {
-                    log_cache.delete(`${location.name}:${player.name}`)
+                    log_cache.delete(`${location.name}:${player.account}`)
                 }
             }
 
@@ -221,7 +221,7 @@ async function createLogMessage(player: Player, location: WorldLocation) {
     const channel = guild.channels.cache.get(LOG_CHANNEL_ID) as TextChannel
 
 
-    const log = log_cache.get(`${location.name}:${player.name}`)
+    const log = log_cache.get(`${location.name}:${player.account}`)
 
     let color = 0xffffff
     let next_ignore = false
@@ -254,7 +254,7 @@ async function createLogMessage(player: Player, location: WorldLocation) {
     }
 
     const embed = new EmbedBuilder()
-    embed.setTitle(`Tresspass log ${player.name} in ${location.name}`)
+    embed.setTitle(`Tresspass log ${player.account} in ${location.name}`)
     embed.setDescription(`${player.name} [${player.account}] was detected within ${location.name}
     First Detection was <t:${log?.first_detection || "never apparently?"}:R>
     This Detection was <t:${Math.floor(Date.now()/1000)}:R>
@@ -303,7 +303,7 @@ async function createLogMessage(player: Player, location: WorldLocation) {
 
         log.detections = detections
         if (next_ignore) log.mute_updated = true;
-        log_cache.set(`${location.name}:${player.name}`, log)
+        log_cache.set(`${location.name}:${player.account}`, log)
 
         
         if (message) {
@@ -320,7 +320,7 @@ async function createLogMessage(player: Player, location: WorldLocation) {
     await message.react("🛟")
     await message.react("💀")
 
-    log_cache.set(`${location.name}:${player.name}`, {
+    log_cache.set(`${location.name}:${player.account}`, {
         message_id: `${message.id}`,
         timestamp: Math.floor(Date.now()/1000),
         muted: false,

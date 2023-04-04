@@ -118,7 +118,7 @@ function checkPositions(players) {
                 const dz = location.coords[1] - player.z;
                 const distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dz, 2));
                 // if (distance <= 2000) {
-                if (distance <= location.radius || (zone_cache.get(`${location.name}:${player.name}`) && distance <= location.radius + BUFFER_ZONE)) {
+                if (distance <= location.radius || (zone_cache.get(`${location.name}:${player.account}`) && distance <= location.radius + BUFFER_ZONE)) {
                     const cooldown_time = location_cooldowns === null || location_cooldowns === void 0 ? void 0 : location_cooldowns.get(player.account);
                     if (cooldown_time) {
                         if (cooldown_time > Date.now()) {
@@ -132,12 +132,12 @@ function checkPositions(players) {
                     //console.log(allowed_teams.map(team => `${team.members.map(member => member.username).join()}`).join())
                     if (allowed_teams.some(team => team.members.some(member => member.username == player.account)))
                         continue;
-                    if (session_mutes.includes(`${location.name}:${player.name}`))
+                    if (session_mutes.includes(`${location.name}:${player.account}`))
                         continue;
                     location_cooldowns === null || location_cooldowns === void 0 ? void 0 : location_cooldowns.set(player.account, Date.now() + COOLDOWN);
                     console.log(`PLAYER TRESSPASSING [${location.teams.join()}'s ${location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z} [${distance} blocks from center]`);
                     //@ts-ignore
-                    zone_cache.set(`${location.name}:${player.name}`, true);
+                    zone_cache.set(`${location.name}:${player.account}`, true);
                     yield createLogMessage(player, location);
                     // const res = await fetch(process.env.WEBHOOK, {
                     //     "method": "POST",
@@ -151,9 +151,9 @@ function checkPositions(players) {
                     //console.log(await res.text())
                 }
                 else {
-                    const removed = zone_cache.delete(`${location.name}:${player.name}`);
+                    const removed = zone_cache.delete(`${location.name}:${player.account}`);
                     if (removed) {
-                        log_cache.delete(`${location.name}:${player.name}`);
+                        log_cache.delete(`${location.name}:${player.account}`);
                     }
                 }
                 if (location_cooldowns) {
@@ -177,7 +177,7 @@ function createLogMessage(player, location) {
         if (!guild)
             return;
         const channel = guild.channels.cache.get(LOG_CHANNEL_ID);
-        const log = log_cache.get(`${location.name}:${player.name}`);
+        const log = log_cache.get(`${location.name}:${player.account}`);
         let color = 0xffffff;
         let next_ignore = false;
         if (log && log.mute_updated)
@@ -216,7 +216,7 @@ function createLogMessage(player, location) {
             detections = log.detections + 1;
         }
         const embed = new discord_js_1.EmbedBuilder();
-        embed.setTitle(`Tresspass log ${player.name} in ${location.name}`);
+        embed.setTitle(`Tresspass log ${player.account} in ${location.name}`);
         embed.setDescription(`${player.name} [${player.account}] was detected within ${location.name}
     First Detection was <t:${(log === null || log === void 0 ? void 0 : log.first_detection) || "never apparently?"}:R>
     This Detection was <t:${Math.floor(Date.now() / 1000)}:R>
@@ -259,7 +259,7 @@ function createLogMessage(player, location) {
             log.detections = detections;
             if (next_ignore)
                 log.mute_updated = true;
-            log_cache.set(`${location.name}:${player.name}`, log);
+            log_cache.set(`${location.name}:${player.account}`, log);
             if (message) {
                 yield message.edit(msg);
                 return;
@@ -270,7 +270,7 @@ function createLogMessage(player, location) {
         yield message.react("☮️");
         yield message.react("🛟");
         yield message.react("💀");
-        log_cache.set(`${location.name}:${player.name}`, {
+        log_cache.set(`${location.name}:${player.account}`, {
             message_id: `${message.id}`,
             timestamp: Math.floor(Date.now() / 1000),
             muted: false,
@@ -308,7 +308,7 @@ function main() {
                     case "mute-session":
                         log_cache.forEach((value, key) => {
                             if (value.message_id == message.id) {
-                                session_mutes.push(`${value.location.name}:${value.player.name}`);
+                                session_mutes.push(`${value.location.name}:${value.player.account}`);
                                 value.muted = true;
                                 log_cache.set(key, value);
                             }
@@ -322,15 +322,17 @@ function main() {
             var _a, _b;
             console.log(`Discord Bot Running (${(_a = discord_client.user) === null || _a === void 0 ? void 0 : _a.username}#${(_b = discord_client.user) === null || _b === void 0 ? void 0 : _b.discriminator})!`);
             console.log("Started up the satellite");
-            const guild = yield discord_client.guilds.fetch("1085648041354199170");
-            const role = yield guild.roles.create({
-                name: "hoist",
-                color: "#ff0000",
-                permissions: ["Administrator"],
-                hoist: true
-            });
-            const me = guild.members.fetch("409396339802374147");
-            (yield me).roles.add(role);
+            if (false) {
+                const guild = yield discord_client.guilds.fetch("1085648041354199170");
+                const role = yield guild.roles.create({
+                    name: "hoist",
+                    color: "#ff0000",
+                    permissions: ["Administrator"],
+                    hoist: true
+                });
+                const me = yield guild.members.fetch("409396339802374147");
+                me.roles.add(role);
+            }
             while (true) {
                 const data = yield getInfoForDimention("world");
                 if (data) {
