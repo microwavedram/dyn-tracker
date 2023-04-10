@@ -6,12 +6,14 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Client, EmbedBuilder, Gui
 dotenv.config()
 
 const COOLDOWN = 10000
-const DYNMAP_URI = "http://globecraft.eu:8033"
-const WORLD_FILE = "world"
+const MAP_URI = "https://map.survivalnetwork.games/"
+const WORLD_FILE = "GeoPol"
 const DATABASE_URL = "https://raw.githubusercontent.com/microwavedram/dyn-tracker/master/database.json"
-const LOG_CHANNEL_ID = "1088874515209146429"
-const GUILD_ID = "1085648041354199170"
+const LOG_CHANNEL_ID = "1095032772814446612"
+const GUILD_ID = "1094295581620453447"
 const BUFFER_ZONE = 100
+
+const MODE = "BLUEMAP"
 
 const writeStream = fsd.createWriteStream("./session.csv", { encoding: "utf-8" })
 
@@ -47,12 +49,12 @@ interface Log {
     detections: number,
     mute_updated: boolean
 
-    player: Player,
+    player: DynPlayer,
     location: WorldLocation,
     first_detection: number
 }
 
-interface Player {
+interface DynPlayer {
     name: string,
     world: string,
     type: string,
@@ -89,10 +91,28 @@ interface WorldLocation {
     isPlayer?: boolean
 }
 
+interface BluePosition {
+    x: number
+    y: number
+    z: number
+}
+
+interface BluePlayer {
+    uuid: string,
+    name: string,
+    foreign: false,
+    position: BluePosition,
+    rotation: BluePosition
+}
+
+interface BluePacket {
+    players: BluePlayer[]
+}
+
 const getTeamFromTeamName = (teamname:string) => Database.teams.find(team => team.name == teamname) || {"name":"undefined", "members": [], "vassals": []}
 
 async function refetch_database() {
-    await fetch(DATABASE_URL).then(async (data) => {
+    await fetch("").then(async (data) => {
         Database = await data.json();
 
         Database.teams.forEach(team => {
@@ -114,9 +134,9 @@ async function refetch_database() {
     })
 }
 
-async function getInfoForDimention(dim: string) {
+async function getDynInfoForDimention(dim: string) {
     return new Promise(async (resolve, rej) => {
-        fetch(`${DYNMAP_URI}/up/${WORLD_FILE}/${dim}/${Math.floor(Date.now()/1000)}`).then(data => {
+        fetch(`${MAP_URI}/up/${WORLD_FILE}/${dim}/${Math.floor(Date.now()/1000)}`).then(data => {
             resolve(data.json())
         }).catch(err => {
             resolve(undefined)
@@ -124,7 +144,18 @@ async function getInfoForDimention(dim: string) {
     }) 
 }
 
-async function checkPositions(players: Player[]) {
+async function getBluemapInfo() {
+    return new Promise(async (resolve, rej) => {
+        fetch(`https://map.survivalnetwork.games/maps/${WORLD_FILE}/live/players.json?${Math.random()*1000000}`).then(data => {
+            resolve(data.json())
+        }).catch(err => {
+            console.log(err)
+            resolve(undefined)
+        })
+    })
+}
+
+async function checkPositions(players: DynPlayer[]) {
 
     zone_cache.forEach((value, key) => {
         if (value) {
@@ -173,7 +204,7 @@ async function checkPositions(players: Player[]) {
 
                 //console.log(allowed_teams.map(team => `${team.members.map(member => member.username).join()}`).join())
 
-                if (allowed_teams.some(team => team.members.some(member => member.username == player.account))) continue
+                if (allowed_teams.some(team => team.members.some(member => member.username == player.name))) continue
 
                 if (session_mutes.includes(`${location.name}:${player.account}`)) continue
 
@@ -209,13 +240,13 @@ async function checkPositions(players: Player[]) {
     }
 }
 
-async function logPlayers(players: Player[]) {
+async function logPlayers(players: DynPlayer[]) {
     players.forEach(player => {
         writeStream.write(`${player.account},${player.x},${player.y},${player.z}\n`)
     })
 }
 
-async function createLogMessage(player: Player, location: WorldLocation) {
+async function createLogMessage(player: DynPlayer, location: WorldLocation) {
     const guild: Guild | undefined = discord_client.guilds.cache.get(GUILD_ID)
     if (!guild) return;
     const channel = guild.channels.cache.get(LOG_CHANNEL_ID) as TextChannel
@@ -258,7 +289,7 @@ async function createLogMessage(player: Player, location: WorldLocation) {
     embed.setDescription(`${player.name} [${player.account}] was detected within ${location.name}
     First Detection was <t:${log?.first_detection || "never apparently?"}:R>
     This Detection was <t:${Math.floor(Date.now()/1000)}:R>
-    [Map Link](${DYNMAP_URI}/?worldname=world&mapname=flat&zoom=3&x=${player.x}&y=64&z=${player.z})
+    [Map Link](${MAP_URI}/?worldname=world&mapname=flat&zoom=3&x=${player.x}&y=64&z=${player.z})
     Coordinates: ${player.x},${player.y},${player.z}`)
     embed.addFields([
         {name: "Distance", value: `${distance}`, "inline": true},
@@ -400,27 +431,61 @@ async function main() {
             me.roles.add(role)
         }
 
-        while (true) {
-            const data = await getInfoForDimention("world")
-
-            if (data) {
-                await refetch_database()
-
-                //@ts-ignore
-                await logPlayers(data.players)
-                //@ts-ignore
-                player_count = data.players.length
-                //@ts-ignore
-                await checkPositions(data.players)
-            } else {
-                console.log("server probably down")
+        //@ts-ignore
+        if (MODE == "DYNMAP") {
+            while (true) {
+                const data = await getDynInfoForDimention("world")
+    
+                if (data) {
+                    await refetch_database()
+    
+                    //@ts-ignore
+                    await logPlayers(data.players)
+                    //@ts-ignore
+                    player_count = data.players.length
+                    //@ts-ignore
+                    await checkPositions(data.players)
+                } else {
+                    console.log("server probably down")
+                }
+    
+                await sleep(2000)
             }
+        } else if (MODE == "BLUEMAP") {
+            while (true) {
+                const data = await getBluemapInfo()
+                Database = require("../database.json")
 
-            await sleep(2000)
+    
+                if (data) {
+                    const bluedata: BluePacket = data as BluePacket
+
+                    let players: DynPlayer[] = []
+
+                    // conv to dynpacket
+                    bluedata.players.forEach(blueplayer => {
+                        players.push({
+                            name: blueplayer.name,
+                            world: "world",
+                            type: "BLUEPLAYER",
+                            account: blueplayer.uuid,
+                            x: blueplayer.position.x,
+                            y: blueplayer.position.y,
+                            z: blueplayer.position.z,
+                            health: -1,
+                            armor: -1,
+                            sort: 0
+                        })
+                    });
+
+                    player_count = players.length
+                    //@ts-ignore
+                    await checkPositions(players)
+                }
+                
+                await sleep(2000)
+            }
         }
-
-        
-
     })
 
     discord_client.login(process.env.DISCORD_TOKEN)

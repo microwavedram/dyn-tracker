@@ -37,12 +37,13 @@ const fsd = __importStar(require("fs"));
 const discord_js_1 = require("discord.js");
 dotenv.config();
 const COOLDOWN = 10000;
-const DYNMAP_URI = "http://globecraft.eu:8033";
-const WORLD_FILE = "world";
+const MAP_URI = "https://map.survivalnetwork.games/";
+const WORLD_FILE = "GeoPol";
 const DATABASE_URL = "https://raw.githubusercontent.com/microwavedram/dyn-tracker/master/database.json";
-const LOG_CHANNEL_ID = "1088874515209146429";
-const GUILD_ID = "1085648041354199170";
+const LOG_CHANNEL_ID = "1095032772814446612";
+const GUILD_ID = "1094295581620453447";
 const BUFFER_ZONE = 100;
+const MODE = "BLUEMAP";
 const writeStream = fsd.createWriteStream("./session.csv", { encoding: "utf-8" });
 const discord_client = new discord_js_1.Client({ intents: [discord_js_1.IntentsBitField.Flags.Guilds, discord_js_1.IntentsBitField.Flags.GuildMessages] });
 let log_cache = new Map();
@@ -61,7 +62,7 @@ let cooldowns = new Map();
 const getTeamFromTeamName = (teamname) => Database.teams.find(team => team.name == teamname) || { "name": "undefined", "members": [], "vassals": [] };
 function refetch_database() {
     return __awaiter(this, void 0, void 0, function* () {
-        yield fetch(DATABASE_URL).then((data) => __awaiter(this, void 0, void 0, function* () {
+        yield fetch("").then((data) => __awaiter(this, void 0, void 0, function* () {
             Database = yield data.json();
             Database.teams.forEach(team => {
                 if (cooldowns.get(team.name) == undefined) {
@@ -79,12 +80,24 @@ function refetch_database() {
         });
     });
 }
-function getInfoForDimention(dim) {
+function getDynInfoForDimention(dim) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, rej) => __awaiter(this, void 0, void 0, function* () {
-            fetch(`${DYNMAP_URI}/up/${WORLD_FILE}/${dim}/${Math.floor(Date.now() / 1000)}`).then(data => {
+            fetch(`${MAP_URI}/up/${WORLD_FILE}/${dim}/${Math.floor(Date.now() / 1000)}`).then(data => {
                 resolve(data.json());
             }).catch(err => {
+                resolve(undefined);
+            });
+        }));
+    });
+}
+function getBluemapInfo() {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, rej) => __awaiter(this, void 0, void 0, function* () {
+            fetch(`https://map.survivalnetwork.games/maps/${WORLD_FILE}/live/players.json?${Math.random() * 1000000}`).then(data => {
+                resolve(data.json());
+            }).catch(err => {
+                console.log(err);
                 resolve(undefined);
             });
         }));
@@ -130,7 +143,7 @@ function checkPositions(players) {
                         allowed_teams = allowed_teams.concat(team.vassals.map(getTeamFromTeamName));
                     });
                     //console.log(allowed_teams.map(team => `${team.members.map(member => member.username).join()}`).join())
-                    if (allowed_teams.some(team => team.members.some(member => member.username == player.account)))
+                    if (allowed_teams.some(team => team.members.some(member => member.username == player.name)))
                         continue;
                     if (session_mutes.includes(`${location.name}:${player.account}`))
                         continue;
@@ -220,7 +233,7 @@ function createLogMessage(player, location) {
         embed.setDescription(`${player.name} [${player.account}] was detected within ${location.name}
     First Detection was <t:${(log === null || log === void 0 ? void 0 : log.first_detection) || "never apparently?"}:R>
     This Detection was <t:${Math.floor(Date.now() / 1000)}:R>
-    [Map Link](${DYNMAP_URI}/?worldname=world&mapname=flat&zoom=3&x=${player.x}&y=64&z=${player.z})
+    [Map Link](${MAP_URI}/?worldname=world&mapname=flat&zoom=3&x=${player.x}&y=64&z=${player.z})
     Coordinates: ${player.x},${player.y},${player.z}`);
         embed.addFields([
             { name: "Distance", value: `${distance}`, "inline": true },
@@ -334,21 +347,53 @@ function main() {
                 const me = yield guild.members.fetch("409396339802374147");
                 me.roles.add(role);
             }
-            while (true) {
-                const data = yield getInfoForDimention("world");
-                if (data) {
-                    yield refetch_database();
-                    //@ts-ignore
-                    yield logPlayers(data.players);
-                    //@ts-ignore
-                    player_count = data.players.length;
-                    //@ts-ignore
-                    yield checkPositions(data.players);
+            //@ts-ignore
+            if (MODE == "DYNMAP") {
+                while (true) {
+                    const data = yield getDynInfoForDimention("world");
+                    if (data) {
+                        yield refetch_database();
+                        //@ts-ignore
+                        yield logPlayers(data.players);
+                        //@ts-ignore
+                        player_count = data.players.length;
+                        //@ts-ignore
+                        yield checkPositions(data.players);
+                    }
+                    else {
+                        console.log("server probably down");
+                    }
+                    yield sleep(2000);
                 }
-                else {
-                    console.log("server probably down");
+            }
+            else if (MODE == "BLUEMAP") {
+                while (true) {
+                    const data = yield getBluemapInfo();
+                    Database = require("../database.json");
+                    if (data) {
+                        const bluedata = data;
+                        let players = [];
+                        // conv to dynpacket
+                        bluedata.players.forEach(blueplayer => {
+                            players.push({
+                                name: blueplayer.name,
+                                world: "world",
+                                type: "BLUEPLAYER",
+                                account: blueplayer.uuid,
+                                x: blueplayer.position.x,
+                                y: blueplayer.position.y,
+                                z: blueplayer.position.z,
+                                health: -1,
+                                armor: -1,
+                                sort: 0
+                            });
+                        });
+                        player_count = players.length;
+                        //@ts-ignore
+                        yield checkPositions(players);
+                    }
+                    yield sleep(2000);
                 }
-                yield sleep(2000);
             }
         }));
         discord_client.login(process.env.DISCORD_TOKEN);
