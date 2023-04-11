@@ -284,12 +284,17 @@ async function createLogMessage(player: DynPlayer, location: WorldLocation) {
         detections = log.detections + 1
     }
 
+    let MAP_LINK = `${MAP_URI}/?worldname=world&mapname=flat&zoom=3&x=${player.x}&y=64&z=${player.z}`
+    if (MODE == "BLUEMAP") {
+        MAP_LINK = `${MAP_URI}/#${WORLD_FILE}:${player.x},${player.y},${player.z}:40:0:0:0:1:flat`
+    }
+
     const embed = new EmbedBuilder()
-    embed.setTitle(`Tresspass log ${player.account} in ${location.name}`)
+    embed.setTitle(`Tresspass log ${MODE == "BLUEMAP" && player.name || player.account} in ${location.name}`)
     embed.setDescription(`${player.name} [${player.account}] was detected within ${location.name}
     First Detection was <t:${log?.first_detection || "never apparently?"}:R>
     This Detection was <t:${Math.floor(Date.now()/1000)}:R>
-    [Map Link](${MAP_URI}/?worldname=world&mapname=flat&zoom=3&x=${player.x}&y=64&z=${player.z})
+    [Map Link](${MAP_LINK})
     Coordinates: ${player.x},${player.y},${player.z}`)
     embed.addFields([
         {name: "Distance", value: `${distance}`, "inline": true},
@@ -301,7 +306,7 @@ async function createLogMessage(player: DynPlayer, location: WorldLocation) {
     embed.setColor(color)
     embed.setTimestamp()
     embed.setAuthor({
-        name: "Azorix Satellite Monitoring",
+        name: "Satellite Monitoring",
         iconURL: discord_client.user?.avatarURL({size: 256}) || ""
     })
     .setFooter({
@@ -459,6 +464,7 @@ async function main() {
     
                 if (data) {
                     const bluedata: BluePacket = data as BluePacket
+                    if (!bluedata.players) return;
 
                     let players: DynPlayer[] = []
 
